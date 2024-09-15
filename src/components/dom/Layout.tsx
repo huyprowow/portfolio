@@ -1,6 +1,5 @@
 'use client'
 
-
 import { useRef } from 'react'
 import dynamic from 'next/dynamic'
 const Scene = dynamic(() => import('@/components/canvas/Scene'), { ssr: false })
@@ -13,7 +12,7 @@ const Layout = ({ children }) => {
       ref={ref}
       style={{
         position: 'relative',
-        width: ' 100%',
+        width: '100%',
         height: '100%',
         overflow: 'auto',
         touchAction: 'auto',

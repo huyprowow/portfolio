@@ -13,13 +13,17 @@
     "@ducanh2912/next-pwa": "^9.4.0",
     "@react-three/drei": "^9.80.2",
     "@react-three/fiber": "^8.13.6",
+    "@react-three/rapier": "^1.1.1",
     "glsl-random": "^0.0.5",
+    "its-fine": "^1.1.1",
+    "live2d-widget-model-unitychan": "^1.0.5",
     "next": "^13.4.13",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "three": "^0.154.0",
     "three-stdlib": "^2.24.2",
-    "tunnel-rat": "^0.1.2"
+    "tunnel-rat": "^0.1.2",
+    "zustand": "^4.4.1"
   },
   "devDependencies": {
     "@next/bundle-analyzer": "^13.4.13",

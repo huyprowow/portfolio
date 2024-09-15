@@ -1,11 +1,11 @@
 'use client'
 
+import RenderStats from '@/helpers/components/Stats/RenderStats'
 import dynamic from 'next/dynamic'
-import { Suspense } from 'react'
-
-const Logo = dynamic(() => import('@/components/canvas/Examples').then((mod) => mod.Logo), { ssr: false })
-const Dog = dynamic(() => import('@/components/canvas/Examples').then((mod) => mod.Dog), { ssr: false })
-const Duck = dynamic(() => import('@/components/canvas/Examples').then((mod) => mod.Duck), { ssr: false })
+import { Physics } from '@react-three/rapier'
+import { Center, Cloud, GizmoHelper, GizmoViewport, Sky } from '@react-three/drei'
+import { useLoadingAssets } from '@/templates/hooks/useLoading'
+import { usePageVisible } from '@/templates/hooks/usePageVisible'
 const View = dynamic(() => import('@/components/canvas/View').then((mod) => mod.View), {
   ssr: false,
   loading: () => (
@@ -22,61 +22,52 @@ const View = dynamic(() => import('@/components/canvas/View').then((mod) => mod.
   ),
 })
 const Common = dynamic(() => import('@/components/canvas/View').then((mod) => mod.Common), { ssr: false })
+const Character = dynamic(() => import('@/components/canvas/Character/Character').then((mod) => mod.default), {
+  ssr: false,
+})
+const Room = dynamic(() => import('@/components/canvas/Map/Room').then((mod) => mod.default), {
+  ssr: false,
+})
+const Ground = dynamic(() => import('@/components/canvas/Map/Ground').then((mod) => mod.default), {
+  ssr: false,
+})
 
 export default function Page() {
+  const loading =useLoadingAssets();
+   const visible = usePageVisible()
   return (
     <>
-      <div className='mx-auto flex w-full flex-col flex-wrap items-center md:flex-row  lg:w-4/5'>
-        {/* jumbo */}
-        <div className='flex w-full flex-col items-start justify-center p-12 text-center md:w-2/5 md:text-left'>
-          <p className='w-full uppercase'>Next + React Three Fiber</p>
-          <h1 className='my-4 text-5xl font-bold leading-tight'>Next 3D Starter</h1>
-          <p className='mb-8 text-2xl leading-normal'>A minimalist starter for React, React-three-fiber and Threejs.</p>
-        </div>
-
-        <div className='w-full text-center md:w-3/5'>
-          <View className='flex h-96 w-full flex-col items-center justify-center'>
-            <Suspense fallback={null}>
-              <Logo route='/blob' scale={0.6} position={[0, 0, 0]} />
-              <Common />
-            </Suspense>
-          </View>
-        </div>
-      </div>
-
-      <div className='mx-auto flex w-full flex-col flex-wrap items-center p-12 md:flex-row  lg:w-4/5'>
-        {/* first row */}
-        <div className='relative h-48 w-full py-6 sm:w-1/2 md:my-12 md:mb-40'>
-          <h2 className='mb-3 text-3xl font-bold leading-none text-gray-800'>Events are propagated</h2>
-          <p className='mb-8 text-gray-600'>Drag, scroll, pinch, and rotate the canvas to explore the 3D scene.</p>
-        </div>
-        <div className='relative my-12 h-48 w-full py-6 sm:w-1/2 md:mb-40'>
-          <View orbit className='relative h-full  sm:h-48 sm:w-full'>
-            <Suspense fallback={null}>
-              <Dog scale={2} position={[0, -1.6, 0]} rotation={[0.0, -0.3, 0]} />
-              <Common color={'lightpink'} />
-            </Suspense>
-          </View>
-        </div>
-        {/* second row */}
-        <div className='relative my-12 h-48 w-full py-6 sm:w-1/2 md:mb-40'>
-          <View orbit className='relative h-full animate-bounce sm:h-48 sm:w-full'>
-            <Suspense fallback={null}>
-              <Duck route='/blob' scale={2} position={[0, -1.6, 0]} />
-              <Common color={'lightblue'} />
-            </Suspense>
-          </View>
-        </div>
-        <div className='w-full p-6 sm:w-1/2'>
-          <h2 className='mb-3 text-3xl font-bold leading-none text-gray-800'>Dom and 3D are synchronized</h2>
-          <p className='mb-8 text-gray-600'>
-            3D Divs are renderer through the View component. It uses gl.scissor to cut the viewport into segments. You
-            tie a view to a tracking div which then controls the position and bounds of the viewport. This allows you to
-            have multiple views with a single, performant canvas. These views will follow their tracking elements,
-            scroll along, resize, etc.
-          </p>
-        </div>
-      </div>
+      <View orbit className='relative h-full sm:w-full'>
+        <Physics debug gravity={[0, -9.8, 0]} timeStep='vary' paused={!visible || loading}>
+          <Common />
+          <RenderStats />
+          <GizmoHelper
+            alignment='bottom-right' // widget alignment within scene
+            margin={[80, 80]} // widget margins (X, Y)
+            // onUpdate={/* called during camera animation  */}
+            // onTarget={/* return current camera target (e.g. from orbit controls) to center animation */}
+            // renderPriority={/* use renderPriority to prevent the helper from disappearing if there is another useFrame(..., 1)*/}
+          >
+            <GizmoViewport axisColors={['red', 'green', 'blue']} labelColor='black' />
+            {/* alternative: <GizmoViewcube /> */}
+          </GizmoHelper>
+          {/**random <Cloud/> in sky */}
+          {/* {Array.from({ length: 4 }).map((_, index) => (
+            <Cloud
+              key={index}
+              segments={20}
+              volume={1000}
+              scale={Math.random() * 10 + 10}
+              fade={100}
+              position={[Math.random() * 500 - 300, Math.random() * 10 + 400, Math.random() * 500 - 300]}
+            />
+          ))} */}
+          <Sky />
+          <Ground />
+          <Room />
+          <Character />
+        </Physics>
+      </View>
     </>
   )
 }
