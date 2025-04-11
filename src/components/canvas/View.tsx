@@ -26,9 +26,9 @@ export const Common = ({ color }) => {
   return (
     <Suspense fallback={null}>
       {color && <color attach='background' args={[color]} />}
-      <ambientLight intensity={0.5} />
-      <pointLight position={[20, 30, 10]} intensity={1} />
-      <pointLight position={[-10, -10, -10]} color='blue' />
+      <ambientLight intensity={2} />
+      <pointLight position={[20, 30, 10]} intensity={3} decay={0.2} />
+      <pointLight position={[-10, -10, -10]} color='blue' intensity={3} decay={0.2} />
       <AccumulativeShadows temporal frames={100} scale={10}>
         <RandomizedLight amount={8} position={[5, 5, -10]} />
       </AccumulativeShadows>

@@ -33,6 +33,7 @@ export const Logo = ({ route = '/blob', ...props }) => {
   useCursor(hovered)
   useFrame((state, delta) => {
     const t = state.clock.getElapsedTime()
+    
     mesh.current.rotation.y = Math.sin(t) * (Math.PI / 8)
     mesh.current.rotation.x = Math.cos(t) * (Math.PI / 8)
     mesh.current.rotation.z -= delta / 4

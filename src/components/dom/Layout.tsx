@@ -10,6 +10,7 @@ const Layout = ({ children }) => {
   return (
     <div
       ref={ref}
+      id="layout"
       style={{
         position: 'relative',
         width: '100%',

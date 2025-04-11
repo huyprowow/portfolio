@@ -25,14 +25,8 @@ const Character = (props) => {
   const lookAt = vec3({ x: -5, y: 15, z: 0 })
   let onAir = false
 
-  const { forward, back, left, right, jump }: any = useKeyboardControls<Controls>((state: any) => state)
-  console.log({
-    forward,
-    back,
-    left,
-    right,
-    jump,
-  })
+  const [, get] = useKeyboardControls()
+
   useEffect(() => {
     setCharacter(nodes)
   }, [])
@@ -78,6 +72,14 @@ const Character = (props) => {
   }
 
   useFrame((state, delta) => {
+    const { forward, back, left, right, jump } = get()
+    // console.log({
+    //   forward,
+    //   back,
+    //   left,
+    //   right,
+    //   jump,
+    // })
     if (rigidBody.current) {
       const position = vec3(rigidBody.current.translation())
       const quaternion = quat(rigidBody.current.rotation())
