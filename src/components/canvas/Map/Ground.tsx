@@ -1,6 +1,6 @@
 import { Plane } from '@react-three/drei'
 import { useLoader } from '@react-three/fiber'
-import { RigidBody } from '@react-three/rapier'
+import { CuboidCollider, RigidBody } from '@react-three/rapier'
 import React from 'react'
 import * as THREE from 'three'
 import { Assets } from '@/helpers/assetMap'
@@ -12,11 +12,14 @@ const Ground = () => {
     texture.repeat.set(100, 100)
     texture.anisotropy = 16
   }
+  const boxGeometry = new THREE.BoxGeometry(1, 1, 1)
+
+  const groundMaterial = new THREE.MeshStandardMaterial({ map: texture })
+
   return (
-    <RigidBody type='fixed' colliders='cuboid' restitution={0} friction={0}>
-      <Plane args={[1000, 1000]} rotation={[-Math.PI / 2, 0, 0]}>
-        <meshBasicMaterial attach='material' map={texture} />
-      </Plane>
+    <RigidBody type='fixed' restitution={0.2} friction={0} scale={[1000, 0.2, 1000]}>
+      <mesh geometry={boxGeometry} material={groundMaterial} position={[0, -0.1, 0]} receiveShadow />
+      <CuboidCollider args={[2, 0.1, 2 * length]} position={[0, -0.1, 0]} restitution={0.2} friction={1} />
     </RigidBody>
   )
 }

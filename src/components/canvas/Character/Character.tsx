@@ -6,47 +6,80 @@ Command: npx gltfjsx@6.2.13 .\public\assets\Fanny\Fanny.glb -o .\src\components\
 import { Assets } from '@/helpers/assetMap'
 import { Controls } from '@/helpers/constants'
 import { useBoundStore } from '@/store/store'
-import { useKeyboardControls } from '@react-three/drei'
+import { OrbitControls, useKeyboardControls } from '@react-three/drei'
 import { useFrame, useLoader, useThree } from '@react-three/fiber'
-import { CuboidCollider, RapierRigidBody, RigidBody, euler, quat, vec3 } from '@react-three/rapier'
+import {
+  CapsuleCollider,
+  CuboidCollider,
+  RapierRigidBody,
+  RigidBody,
+  euler,
+  quat,
+  useRapier,
+  vec3,
+} from '@react-three/rapier'
+import { useControls } from 'leva'
 import { useEffect, useRef } from 'react'
 import * as THREE from 'three'
 import { MMDLoader } from 'three-stdlib'
-import Cameras from './Cameras/Cameras'
+import Camera from './Camera/Camera'
+import { useDebugMode } from '@/hooks/useDebugMode'
+import { matchesGlob } from 'path'
 
-const Character = (props) => {
-  const group = useRef()
+interface CharacterProps {
+  // Add any props if needed
+  orbit: boolean
+}
+
+const Character: React.FC<CharacterProps> = (props) => {
+  const group = useRef(null)
   const nodes = useLoader(MMDLoader, Assets.CHARACTER)
   const setCharacter = useBoundStore((state) => state.setCharacter)
-  const rigidBody = useRef<RapierRigidBody>(null)
-  const { controls, camera } = useThree((state) => state)
-  let rotateAngle = new THREE.Vector3(0, 1, 0)
-  let rotateQuaternion = new THREE.Quaternion()
-  const lookAt = vec3({ x: -5, y: 15, z: 0 })
-  let onAir = false
+  const player = useRef<RapierRigidBody>(null)
+  const { controls, camera, scene } = useThree((state) => state)
+  const playerCollideHalfHeight = 5
+  const { rapier, world } = useRapier()
+  const isDebugMode = useDebugMode()
 
-  const [, get] = useKeyboardControls()
+  const [subscribeKeys, getKeys] = useKeyboardControls()
+  const followCameraFunc = useBoundStore((state) => state.followCameraFunc)
 
   useEffect(() => {
-    setCharacter(nodes)
-  }, [])
+    if (nodes) {
+      setCharacter(nodes)
+    }
+  }, [nodes, setCharacter])
+
+  useEffect(() => {
+    const unSubscribeJumpKey = subscribeKeys(
+      (state) => state.jump,
+      (jump) => {
+        if (jump) {
+          jumpCharacter()
+        }
+      },
+    )
+    return () => {
+      unSubscribeJumpKey()
+    }
+  }, [subscribeKeys])
 
   //tinh toan huong bu cua nhan vat
   /*               w
-        pi/4   0(offset) -pi/4
+  pi/4   0(offset) -pi/4
   (a)  pi/2                     -pi/2 (d)
-        3pi/4      pi    -3pi/4
-                  s                  */
+  3pi/4      pi    -3pi/4
+  s                  */
   const directionOffset = ({
     forward,
     left,
     right,
     backward,
   }: {
-    forward: Boolean
-    left: Boolean
-    right: Boolean
-    backward: Boolean
+    forward: boolean
+    left: boolean
+    right: boolean
+    backward: boolean
   }) => {
     let directionOffset = 0
     if (forward) {
@@ -70,83 +103,131 @@ const Character = (props) => {
     }
     return directionOffset
   }
+  const rotateCharacter = ({
+    forward,
+    left,
+    right,
+    backward,
+  }: {
+    forward: boolean
+    left: boolean
+    right: boolean
+    backward: boolean
+  }) => {
+    if (!player.current) return
 
+    const rotateAngle = new THREE.Vector3(0, 1, 0)
+    const rotateQuaternion = new THREE.Quaternion()
+    const currentRotation = player.current.rotation()
+    const quaternion = new THREE.Quaternion(currentRotation.x, currentRotation.y, currentRotation.z, currentRotation.w)
+    const desiredQuaternion = directionOffset({ forward, left, right, backward })
+
+    rotateQuaternion.setFromAxisAngle(rotateAngle, desiredQuaternion)
+    quaternion.slerp(rotateQuaternion, 0.1)
+
+    player.current.setRotation(quaternion, true)
+  }
+  const jumpCharacter = () => {
+    if (!player.current) return
+
+    const originRayPosition = player.current.translation()
+
+    originRayPosition.y -= 0.01
+
+    const directionRayCast = vec3({ x: 0, y: -1, z: 0 })
+    const maxTimeOfImpact = 10
+
+    const ray = new rapier.Ray(originRayPosition, directionRayCast)
+    const hit = world.castRay(ray, maxTimeOfImpact, true)
+
+    if (hit?.timeOfImpact < 1) {
+      const impulse = new THREE.Vector3(0, 500, 0)
+      player.current.applyImpulse(impulse, true)
+    }
+
+    if (isDebugMode) {
+      // Add debug logging
+      console.log('Ray cast details:', {
+        origin: originRayPosition,
+        direction: directionRayCast,
+        hit: hit,
+        timeOfImpact: hit?.timeOfImpact,
+        collider: hit?.collider,
+      })
+      const debugRay = new THREE.Line(
+        new THREE.BufferGeometry().setFromPoints([
+          new THREE.Vector3(originRayPosition.x, originRayPosition.y, originRayPosition.z),
+          new THREE.Vector3(originRayPosition.x, originRayPosition.y - maxTimeOfImpact, originRayPosition.z),
+        ]),
+        new THREE.LineBasicMaterial({ color: 0xff0000 }),
+      )
+      scene.add(debugRay)
+      // Remove the debug ray after 1 second
+      setTimeout(() => {
+        scene.remove(debugRay)
+      }, 1000)
+    }
+  }
+  const moveCharacter = ({ forward, back, left, right, deltaTime }) => {
+    console.log('move')
+    if (!player.current) return
+    const impulse = new THREE.Vector3(0, 0, 0)
+    const torque = new THREE.Vector3(0, 0, 0)
+    const impulseStrength = 13 * player.current.mass() * deltaTime
+    const torqueStrength = 4 * player.current.mass() * deltaTime
+    if (forward) {
+      impulse.z += impulseStrength
+    }
+    if (back) {
+      impulse.z -= impulseStrength
+    }
+    if (left) {
+      impulse.x += impulseStrength
+    }
+    if (right) {
+      impulse.x -= impulseStrength
+    }
+
+    player.current.applyImpulse(impulse, true)
+  }
   useFrame((state, delta) => {
-    const { forward, back, left, right, jump } = get()
-    // console.log({
-    //   forward,
-    //   back,
-    //   left,
-    //   right,
-    //   jump,
-    // })
-    if (rigidBody.current) {
-      const position = vec3(rigidBody.current.translation())
-      const quaternion = quat(rigidBody.current.rotation())
-      const eulerRot = euler().setFromQuaternion(quat(rigidBody.current.rotation()))
+    const { forward, back, left, right } = getKeys()
 
-      if (forward || back || left || right) {
-        const desiredQuaternion = directionOffset({ forward, left, right, backward: back })
-        quaternion.slerp(rotateQuaternion.setFromAxisAngle(rotateAngle, desiredQuaternion), 0.2)
-        // While Rapier's return types need conversion, setting values can be done directly with Three.js types
-        rigidBody.current.setRotation(quaternion, true)
+    if (forward || back || left || right) {
+      rotateCharacter({
+        forward,
+        left,
+        right,
+        backward: back,
+      })
+      moveCharacter({
+        forward,
+        back,
+        left,
+        right,
+        deltaTime: delta,
+      })
+    }
+    // follow camera
+    if (followCameraFunc) {
+      if (!props.orbit) {
+        followCameraFunc(delta)
       }
-
-      if (jump) {
-        rigidBody.current.applyImpulse(new THREE.Vector3(0, 1000, 0), true) // Sử dụng applyForce cho nhảy
-      }
-      rigidBody.current.setTranslation(position, true)
-      camera.lookAt(position.add(lookAt))
     }
   })
+  console.log(nodes)
   return (
-    <group ref={group} {...props} dispose={null} position={[-8, 9, 7]} rotation={[0, 0, 0]} scale={1}>
+    <group ref={group} {...props} dispose={null} rotation={[0, 0, 0]} scale={1}>
       <mesh>
-        <Cameras />
-        <RigidBody colliders={false} ref={rigidBody} lockRotations={true}>
+        <Camera player={player} />
+        <RigidBody colliders={false} ref={player} lockRotations={true}>
           <primitive object={nodes} />
 
-          {/* <group name='Root_Scene'>
-          <group name='RootNode'>
-            <group name='Armature' scale={100} position={[0, 0, -3.7]}>
-              <primitive object={nodes.mixamorigHips} />
-            </group>
-
-            <skinnedMesh
-              name='body_0'
-              geometry={nodes.body_0.geometry}
-              material={materials['fanny_skin07_high_d_03mat.001']}
-              skeleton={nodes.body_0.skeleton}
-              scale={100}
-            />
-            <skinnedMesh
-              name='weapon_0'
-              geometry={nodes.weapon_0.geometry}
-              material={materials['fanny_skin07_high_d_02mat.001']}
-              skeleton={nodes.weapon_0.skeleton}
-              scale={100}
-            />
-            <skinnedMesh
-              name='body_1'
-              geometry={nodes.body_1.geometry}
-              material={materials['fanny_skin07_high_d_01mat.001']}
-              skeleton={nodes.body_1.skeleton}
-              scale={100}
-            />
-            <skinnedMesh
-              name='m_body_1001'
-              geometry={nodes.m_body_1001.geometry}
-              material={materials['fanny_skin07_high_d_01mat.001']}
-              skeleton={nodes.m_body_1001.skeleton}
-              scale={100}
-            />
-          </group>
-        </group> */}
-          <CuboidCollider
-            args={[5, 10, 5]}
-            position={[0, 10, 0]}
+          <CapsuleCollider
+            args={[playerCollideHalfHeight, 5]}
+            position={[0, playerCollideHalfHeight + 5, 0]}
             mass={50}
-            friction={1.0}
+            friction={1}
             restitution={0}
             linearDamping={1}
             angularDamping={1}
@@ -156,4 +237,5 @@ const Character = (props) => {
     </group>
   )
 }
+
 export default Character

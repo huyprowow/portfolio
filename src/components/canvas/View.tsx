@@ -10,19 +10,27 @@ import {
   View as ViewImpl,
 } from '@react-three/drei'
 import { Three } from '@/helpers/components/Three'
-import { useFrame } from '@react-three/fiber'
+import { useFrame, useThree } from '@react-three/fiber'
 import { useBoundStore } from '@/store/store'
 import * as THREE from 'three'
+import { Canvas } from '@react-three/fiber'
+import { ReactNode } from 'react'
 
-export const Common = ({ color }) => {
-  const vec = new THREE.Vector3()
-  const target = new THREE.Vector3(0, 0, 0)
-  const character = useBoundStore((state) => state.character)
+interface CommonProps {
+  color?: string
+}
+
+export function SceneCommon({ color = '#000000' }: CommonProps) {
+  // const vec = new THREE.Vector3()
+  // const target = new THREE.Vector3(0, 0, 0)
+  // const character = useBoundStore((state) => state.character)
+
   // useFrame((state) => {
-  // if(character===null) return;
-  // target.lerp(character.getWorldPosition(vec), 0.02)
-  // state.camera.lookAt(target)
+  //   if (!character || !('getWorldPosition' in character)) return
+  //   target.lerp((character as THREE.Object3D).getWorldPosition(vec), 0.02)
+  //   state.camera.lookAt(target)
   // })
+
   return (
     <Suspense fallback={null}>
       {color && <color attach='background' args={[color]} />}
@@ -36,28 +44,29 @@ export const Common = ({ color }) => {
   )
 }
 
-const View = forwardRef(({ children, orbit, ...props }, ref) => {
-  const localRef = useRef(null)
-  const cameraIndex = useBoundStore((state) => state.cameraIndex)
+interface ViewProps {
+  children: ReactNode
+  orbit?: boolean
+  className?: string
+  target?: THREE.Vector3
+}
 
-  useImperativeHandle(ref, () => localRef.current)
+const OrbitView = ({ target }: { target?: THREE.Vector3 }) => {
+  const camera = useThree((state) => state.camera)
 
+  // Get the camera's current target
+  const cameraTarget = target ? target.clone() : new THREE.Vector3()
+  camera.getWorldDirection(cameraTarget)
+  cameraTarget.multiplyScalar(10).add(camera.position)
+
+  return <OrbitControls camera={camera} target={cameraTarget} />
+}
+
+export function SceneView({ children, orbit = false, className = '', target }: ViewProps) {
   return (
-    <>
-      <div ref={localRef} {...props} />
-      <Three>
-        <ViewImpl track={localRef}>
-          {children}
-
-          {
-            orbit && cameraIndex === 0 && <OrbitControls makeDefault />
-            // : <PointerLockControls />
-          }
-        </ViewImpl>
-      </Three>
-    </>
+    <Canvas className={className}>
+      {orbit ? <OrbitView target={target} /> : null}
+      {children}
+    </Canvas>
   )
-})
-View.displayName = 'View'
-
-export { View }
+}

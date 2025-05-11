@@ -1,9 +1,9 @@
-import { createCharacterAnimationSlice } from './characterAnimation';
+import { createCharacterAnimationSlice } from './characterAnimation'
 import { createCharacterSlice } from './character'
 import { create } from 'zustand'
-import { createCameraSwapSlice } from './cameraSwap'
-export const useBoundStore = create<ICameraSwapSlice & ICharacterSlice & ICharacterAnimationSlice>()((...a) => ({
-  ...createCameraSwapSlice(...a),
+import { createCameraSlice, ICameraSlice } from './camera'
+export const useBoundStore = create<ICharacterSlice & ICharacterAnimationSlice & ICameraSlice>()((...a) => ({
   ...createCharacterSlice(...a),
   ...createCharacterAnimationSlice(...a),
+  ...createCameraSlice(...a),
 }))

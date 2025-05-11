@@ -8,9 +8,11 @@ import { CONSTANTS } from '@/helpers/constants'
 import { RigidBody } from '@react-three/rapier'
 import { useGLTF, useHelper } from '@react-three/drei'
 import * as THREE from 'three'
+import { useDebugMode } from '@/hooks/useDebugMode'
 const Room = () => {
   const room = useLoader(GLTFLoader, Assets.ROOM)
   const roomRef = useRef(null)
+  const isDebugMode = useDebugMode()
   // useHelper(roomRef.current, THREE.AxesHelper, {
   //   size: 100,
   // })
@@ -18,7 +20,7 @@ const Room = () => {
 
   return (
     <>
-      <axesHelper args={[500]} />
+      {isDebugMode ? <axesHelper args={[500]} /> : null}
       <RigidBody
         type='fixed'
         // colliders='hull'
