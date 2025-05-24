@@ -6,7 +6,7 @@ Command: npx gltfjsx@6.2.13 .\public\assets\Fanny\Fanny.glb -o .\src\components\
 import { Assets } from '@/helpers/assetMap'
 import { Controls } from '@/helpers/constants'
 import { useBoundStore } from '@/store/store'
-import { OrbitControls, useKeyboardControls } from '@react-three/drei'
+import { OrbitControls, useFBX, useKeyboardControls } from '@react-three/drei'
 import { useFrame, useLoader, useThree } from '@react-three/fiber'
 import {
   CapsuleCollider,
@@ -19,13 +19,16 @@ import {
   vec3,
 } from '@react-three/rapier'
 import { useControls } from 'leva'
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import * as THREE from 'three'
-import { MMDLoader } from 'three-stdlib'
+import { FBXLoader, MMDLoader } from 'three-stdlib'
 import Camera from './Camera/Camera'
 import { useDebugMode } from '@/hooks/useDebugMode'
 import { matchesGlob } from 'path'
+import { useAnimationModel } from '@/hooks/useAnimationModel'
+import characterSetting from '@/settings/df_character_setting.json'
 
+console.log(characterSetting)
 interface CharacterProps {
   // Add any props if needed
   orbit: boolean
@@ -33,16 +36,34 @@ interface CharacterProps {
 
 const Character: React.FC<CharacterProps> = (props) => {
   const group = useRef(null)
-  const nodes = useLoader(MMDLoader, Assets.CHARACTER)
+  const nodes = useLoader(FBXLoader, Assets.CHARACTER)
   const setCharacter = useBoundStore((state) => state.setCharacter)
   const player = useRef<RapierRigidBody>(null)
   const { controls, camera, scene } = useThree((state) => state)
-  const playerCollideHalfHeight = 5
+  const playerCollideHalfHeight = 4
   const { rapier, world } = useRapier()
   const isDebugMode = useDebugMode()
+  const { helmet, shield, sword } = useControls('Character Setting', {
+    helmet: {
+      value: true,
+      label: 'Helmet',
+    },
+    shield: {
+      value: true,
+      label: 'Shield',
+    },
+    sword: {
+      value: true,
+      label: 'Sword',
+    },
+  })
 
   const [subscribeKeys, getKeys] = useKeyboardControls()
   const followCameraFunc = useBoundStore((state) => state.followCameraFunc)
+  const { actionMap, mixer, currentAction, setCurrentAction } = useAnimationModel({ player: nodes })
+  // const fbxTemp = useFBX(Assets.ANIMATION.SWORD_AND_SHIELD_IDLE)
+
+
 
   useEffect(() => {
     if (nodes) {
@@ -129,6 +150,10 @@ const Character: React.FC<CharacterProps> = (props) => {
   }
   const jumpCharacter = () => {
     if (!player.current) return
+    console.log('jumpCharacter')
+
+    // nodes.children[1].material.transparent = true
+    nodes.children[3].material.opacity = 0.5
 
     const originRayPosition = player.current.translation()
 
@@ -167,6 +192,7 @@ const Character: React.FC<CharacterProps> = (props) => {
         scene.remove(debugRay)
       }, 1000)
     }
+    setCurrentAction(characterSetting.animation.jump.name)
   }
   const moveCharacter = ({ forward, back, left, right, deltaTime }) => {
     console.log('move')
@@ -189,6 +215,7 @@ const Character: React.FC<CharacterProps> = (props) => {
     }
 
     player.current.applyImpulse(impulse, true)
+    setCurrentAction(characterSetting.animation.walk.name)
   }
   useFrame((state, delta) => {
     const { forward, back, left, right } = getKeys()
@@ -208,32 +235,40 @@ const Character: React.FC<CharacterProps> = (props) => {
         deltaTime: delta,
       })
     }
-    // follow camera
+    //follow camera
     if (followCameraFunc) {
       if (!props.orbit) {
         followCameraFunc(delta)
       }
     }
-  })
-  console.log(nodes)
-  return (
-    <group ref={group} {...props} dispose={null} rotation={[0, 0, 0]} scale={1}>
-      <mesh>
-        <Camera player={player} />
-        <RigidBody colliders={false} ref={player} lockRotations={true}>
-          <primitive object={nodes} />
 
-          <CapsuleCollider
-            args={[playerCollideHalfHeight, 5]}
-            position={[0, playerCollideHalfHeight + 5, 0]}
-            mass={50}
-            friction={1}
-            restitution={0}
-            linearDamping={1}
-            angularDamping={1}
-          />
-        </RigidBody>
-      </mesh>
+    mixer.update(delta)
+  })
+  return (
+    <group ref={group} {...props} dispose={null} rotation={[0, 0, 0]}>
+      <Camera player={player} />
+      <RigidBody colliders={false} ref={player} lockRotations={true}>
+        <primitive object={nodes} scale={0.1}></primitive>
+        {/* <mesh geometry={nodes.children[0].geometry} material={nodes.children[0].material} scale={0.1}></mesh> */}
+        {/* {helmet && (
+          <mesh geometry={nodes.children[1].geometry} material={nodes.children[1].material} scale={0.1}></mesh>
+        )}
+        {shield && (
+          <mesh geometry={nodes.children[2].geometry} material={nodes.children[2].material} scale={0.1}></mesh>
+        )}
+        <mesh geometry={nodes.children[3].geometry} material={nodes.children[3].material} scale={0.1}></mesh>
+        {sword && <mesh geometry={nodes.children[4].geometry} material={nodes.children[4].material} scale={0.1}></mesh>} */}
+
+        <CapsuleCollider
+          args={[playerCollideHalfHeight, 5]}
+          position={[0, playerCollideHalfHeight + 5, 0]}
+          mass={50}
+          friction={1}
+          restitution={0}
+          linearDamping={1}
+          angularDamping={1}
+        />
+      </RigidBody>
     </group>
   )
 }

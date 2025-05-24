@@ -1,0 +1,40 @@
+{
+  "character": {
+    "name": "Character"
+  },
+  "animation": {
+    "idle": {
+      "name": "SWORD_AND_SHIELD_IDLE_2"
+    },
+    "walk": {
+      "name": "SWORD_AND_SHIELD_WALK"
+    },
+    "run": {
+      "name": "SWORD_AND_SHIELD_RUN"
+    },
+    "jump": {
+      "name": "SWORD_AND_SHIELD_JUMP_2"
+    },
+    "attack": {
+      "name": "SWORD_AND_SHIELD_ATTACK"
+    },
+    "kick": {
+      "name": "SWORD_AND_SHIELD_KICK"
+    },
+    "block": {
+      "name": "SWORD_AND_SHIELD_BLOCK"
+    },
+    "powerUp": {
+      "name": "SWORD_AND_SHIELD_POWER_UP"
+    },
+    "death": {
+      "name": "SWORD_AND_SHIELD_DEATH"
+    },
+    "crouch": {
+      "name": "SWORD_AND_SHIELD_CROUCH"
+    },
+    "crouchIdle": {
+      "name": "SWORD_AND_SHIELD_CROUCH_IDLE"
+    }
+  }
+}

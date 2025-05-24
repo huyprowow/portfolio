@@ -66,7 +66,8 @@ const Camera = ({ player }: CameraProps) => {
       rotation={[0, Math.PI, 0]}
       position={[
         //-5, 15, -10.5
-        -5, 15, -25,
+        // -5, 15, -25,
+        -5, 15, -25 // Adjusted for better view
       ]}
     >
       {/* <PointerLockControls

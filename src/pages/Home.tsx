@@ -12,8 +12,8 @@ import { DebugUI } from '../components/canvas/Debug/DebugUI'
 import Camera from '../components/canvas/Character/Camera/Camera'
 import Room from '../components/canvas/Map/Room'
 import Ground from '../components/canvas/Map/Ground'
-import Character from '@/components/canvas/Character/Character'
 import { useControls } from 'leva'
+import Character from '@/components/canvas/Character/Character'
 
 const startDebug = () => {
   const hash = window.location.hash
@@ -26,8 +26,8 @@ export default function Home() {
   const loading = useLoadingAssets()
   const visible = usePageVisible()
   const isDebugMode = useDebugMode()
-  
-  const { orbit } = useControls('Camera',{
+
+  const { orbit } = useControls('Camera', {
     orbit: false,
   })
 
@@ -60,7 +60,7 @@ export default function Home() {
           <Physics debug={isDebugMode} gravity={[0, -9.8, 0]} timeStep='vary' paused={!visible || loading}>
             <Ground />
             {/* <Room /> */}
-            <Character orbit={orbit}/>
+            <Character orbit={orbit} />
 
             {isDebugMode && (
               <>

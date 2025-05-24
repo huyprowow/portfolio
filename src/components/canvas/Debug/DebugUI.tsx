@@ -7,8 +7,7 @@ export function DebugUI() {
 
   return (
     <>
-      <Leva hidden={!isDebugMode} 
-      />
+      <Leva hidden={!isDebugMode} collapsed={true} />
     </>
   )
 }
