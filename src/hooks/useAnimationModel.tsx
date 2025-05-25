@@ -7,6 +7,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { AnimationAction, AnimationMixer } from 'three'
 import { FBXLoader } from 'three-stdlib'
 import characterSetting from '@/settings/df_character_setting.json'
+import * as THREE from 'three'
 
 interface IProps {
   player: any
@@ -60,10 +61,20 @@ export const useAnimationModel = ({ player }: IProps) => {
     }
   }, [actionMap, animationDebugValue, debugAnimation, currentAction])
 
+  const playAction = (action: AnimationAction, loopMode: THREE.AnimationActionLoopStyles) => {
+    action.reset()
+    action.setLoop(loopMode, Infinity)
+    action.clampWhenFinished = true
+    action.fadeIn(0.15).play()
+  }
   useEffect(() => {
     const action = currentAction ? actionMap.get(currentAction) : actionMap.get(characterSetting.animation.idle.name)
     if (action) {
-      action.reset().fadeIn(0.1).play()
+      let loopMode: THREE.AnimationActionLoopStyles = THREE.LoopRepeat
+      if (currentAction === characterSetting.animation.jump.name) {
+        loopMode = THREE.LoopOnce
+      }
+      playAction(action, loopMode)
     }
     return () => {
       action?.fadeOut(0.1)

@@ -33,7 +33,6 @@ interface CharacterProps {
   // Add any props if needed
   orbit: boolean
 }
-
 const Character: React.FC<CharacterProps> = (props) => {
   const group = useRef(null)
   const nodes = useLoader(FBXLoader, Assets.CHARACTER)
@@ -62,8 +61,6 @@ const Character: React.FC<CharacterProps> = (props) => {
   const followCameraFunc = useBoundStore((state) => state.followCameraFunc)
   const { actionMap, mixer, currentAction, setCurrentAction } = useAnimationModel({ player: nodes })
   // const fbxTemp = useFBX(Assets.ANIMATION.SWORD_AND_SHIELD_IDLE)
-
-
 
   useEffect(() => {
     if (nodes) {
@@ -148,8 +145,20 @@ const Character: React.FC<CharacterProps> = (props) => {
 
     player.current.setRotation(quaternion, true)
   }
+  const jumpTimeout = useRef<NodeJS.Timeout | null>(null)
   const jumpCharacter = () => {
+    // Clear all pending timeouts
+    if (idleTimeout.current) {
+      clearTimeout(idleTimeout.current)
+      idleTimeout.current = null
+    }
+    if (jumpTimeout.current) {
+      clearTimeout(jumpTimeout.current)
+      jumpTimeout.current = null
+    }
+
     if (!player.current) return
+
     console.log('jumpCharacter')
 
     // nodes.children[1].material.transparent = true
@@ -192,7 +201,23 @@ const Character: React.FC<CharacterProps> = (props) => {
         scene.remove(debugRay)
       }, 1000)
     }
+
+    // Play jump animation ONCE and clamp when finished
+    const jumpAction = actionMap.get(characterSetting.animation.jump.name)
+    if (jumpAction) {
+      jumpAction.reset()
+      jumpAction.setLoop(THREE.LoopOnce, 1)
+      jumpAction.clampWhenFinished = true
+      jumpAction.fadeIn(0.15).play()
+    }
     setCurrentAction(characterSetting.animation.jump.name)
+
+    // Set jump timeout to return to idle after jump animation
+    const jumpDuration = jumpAction?.getClip().duration ?? 1
+    jumpTimeout.current = setTimeout(() => {
+      setCurrentAction(characterSetting.animation.idle.name)
+      jumpTimeout.current = null
+    }, jumpDuration * 1000)
   }
   const moveCharacter = ({ forward, back, left, right, deltaTime }) => {
     console.log('move')
@@ -217,8 +242,52 @@ const Character: React.FC<CharacterProps> = (props) => {
     player.current.applyImpulse(impulse, true)
     setCurrentAction(characterSetting.animation.walk.name)
   }
+
+  const idleTimeout = useRef<NodeJS.Timeout | null>(null)
+  const prevKeys = useRef({ forward: false, back: false, left: false, right: false, jump: false })
   useFrame((state, delta) => {
     const { forward, back, left, right } = getKeys()
+    const keys = getKeys()
+    const isMoving = keys.forward || keys.back || keys.left || keys.right
+    const justStartedMoving =
+      isMoving &&
+      !(prevKeys.current.forward || prevKeys.current.back || prevKeys.current.left || prevKeys.current.right)
+    const justStoppedMoving =
+      !isMoving &&
+      (prevKeys.current.forward || prevKeys.current.back || prevKeys.current.left || prevKeys.current.right)
+
+    if (justStartedMoving) {
+      // Cancel any pending idle transition
+      if (idleTimeout.current) {
+        clearTimeout(idleTimeout.current)
+        idleTimeout.current = null
+      }
+      if (jumpTimeout.current) {
+        clearTimeout(jumpTimeout.current)
+        jumpTimeout.current = null
+      }
+      setCurrentAction(characterSetting.animation.walk.name)
+    } else if (justStoppedMoving) {
+      // Stop movement instantly
+      if (player.current) {
+        player.current.setLinvel({ x: 0, y: player.current.linvel().y, z: 0 }, true)
+      }
+      // Let walk animation finish its current loop and hold last frame
+      const walkAction = actionMap.get(characterSetting.animation.walk.name)
+      if (walkAction) {
+        walkAction.setLoop(THREE.LoopOnce, 1)
+        walkAction.clampWhenFinished = true
+        if (!walkAction.isRunning()) {
+          walkAction.reset().play()
+        }
+      }
+      setCurrentAction(characterSetting.animation.walk.name)
+      // Set a timeout to transition to idle after 300ms
+      idleTimeout.current = setTimeout(() => {
+        setCurrentAction(characterSetting.animation.idle.name)
+        idleTimeout.current = null
+      }, 1000)
+    }
 
     if (forward || back || left || right) {
       rotateCharacter({
@@ -243,11 +312,12 @@ const Character: React.FC<CharacterProps> = (props) => {
     }
 
     mixer.update(delta)
+    prevKeys.current = keys
   })
   return (
     <group ref={group} {...props} dispose={null} rotation={[0, 0, 0]}>
       <Camera player={player} />
-      <RigidBody colliders={false} ref={player} lockRotations={true}>
+      <RigidBody canSleep={false} colliders={false} ref={player} lockRotations={true}>
         <primitive object={nodes} scale={0.1}></primitive>
         {/* <mesh geometry={nodes.children[0].geometry} material={nodes.children[0].material} scale={0.1}></mesh> */}
         {/* {helmet && (
