@@ -72,6 +72,7 @@ const Character: React.FC<CharacterProps> = (props) => {
     }
   }, [nodes, setCharacter])
 
+  // hear jump key press
   useEffect(() => {
     const unSubscribeJumpKey = subscribeKeys(
       (state) => state.jump,
@@ -223,6 +224,8 @@ const Character: React.FC<CharacterProps> = (props) => {
       jumpTimeout.current = null
     }, jumpDuration * 1000)
   }
+  // TODO: solve move character and camera direction
+
   const moveCharacter = ({ forward, back, left, right, deltaTime }) => {
     console.log('move')
     if (!player.current) return
@@ -298,7 +301,7 @@ const Character: React.FC<CharacterProps> = (props) => {
         deltaTime: delta,
       })
     }
-   // follow camera
+    // follow camera
     if (followCameraFunc) {
       followCameraFunc(delta)
     }
@@ -307,7 +310,6 @@ const Character: React.FC<CharacterProps> = (props) => {
     prevKeys.current = keys
   })
 
-  
   return (
     <group ref={group} {...props} dispose={null} rotation={[0, 0, 0]}>
       <Camera player={player} />

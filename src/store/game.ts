@@ -3,7 +3,7 @@ import { EGameMode } from '@/constant/enum'
 import { StateCreator } from 'zustand'
 export const createGameSlice: StateCreator<IGameSlice> = (set) => ({
   game: {
-    mode: EGameMode.Normal,
+    mode: EGameMode.Follow,
   },
   setGameMode: (modeOrSetterFn: ReactStyleStateSetter<EGameMode>) => {
     set((state) => {

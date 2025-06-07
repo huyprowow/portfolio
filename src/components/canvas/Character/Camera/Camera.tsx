@@ -1,5 +1,6 @@
 import { EGameMode } from '@/constant/enum'
 import { Controls } from '@/helpers/constants'
+import { mobileAndTabletCheck } from '@/helpers/mobileAndTabletCheck'
 import useDebugControl, { CameraOptions } from '@/hooks/useDebugControl'
 import { useBoundStore } from '@/store/store'
 import { OrbitControls, PerspectiveCamera, PointerLockControls, useKeyboardControls } from '@react-three/drei'
@@ -17,8 +18,11 @@ const Camera = ({ player }: CameraProps) => {
   const [smoothCameraTarget] = useState(() => new THREE.Vector3(0, 0, 0))
   const tmpCameraPosition = useRef(new THREE.Vector3())
   const tmpCameraTarget = useRef(new THREE.Vector3())
-  const height = 10
-  const cameraDistance = 35
+  const height = 14
+  const cameraDistance = 26
+  const gameMode = useBoundStore((state) => state.game.mode)
+
+  // setting camera behind player first time
   useEffect(() => {
     if (player.current) {
       const rot = player.current.rotation()
@@ -41,72 +45,152 @@ const Camera = ({ player }: CameraProps) => {
   const [yaw, setYaw] = useState(Math.PI) // Start in behind the player
   const [pitch, setPitch] = useState(0)
   const mouseSensitivity = {
-    yaw: 0.002,
-    pitch: 0.002,
+    yaw: 0.0005,
+    pitch: 0.00025,
+  }
+  const touchSensitivity = {
+    yaw: 0.088,
+    pitch: 0.033,
   }
 
   /***
    * way to update yaw and pitch
    *
    */
-  const minPitch = -Math.PI / 2 + 0.1
+  const minPitch = -Math.PI / 2 + 0.2
   const maxPitch = Math.PI / 2 - 0.1
+  const isMb = mobileAndTabletCheck()
+
+  //mb camera control
   useEffect(() => {
-    let dragging = false
-    let lastX = 0
-    let lastY = 0
-    const onMouseDown = (e: MouseEvent) => {
-      dragging = true
-      lastX = e.clientX
-      lastY = e.clientY
-    }
-    const onMouseUp = () => (dragging = false)
-    const onMouseMove = (e: MouseEvent) => {
-      if (!dragging) return
-      const deltaX = e.clientX - lastX
-      const deltaY = e.clientY - lastY
-      setYaw((prev) => prev - deltaX * mouseSensitivity.yaw) // adjust sensitivity as needed
-      setPitch((prev) => {
-        const next = prev - deltaY * mouseSensitivity.pitch // adjust sensitivity as needed
-        return Math.max(minPitch, Math.min(maxPitch, next))
-      })
-      lastX = e.clientX
-      lastY = e.clientY
+    if (!isMb) return
+    let lastTouchX: number | null = null
+    let lastTouchY: number | null = null
+
+    const onTouchStart = (e: TouchEvent) => {
+      if (e.touches.length === 1) {
+        lastTouchX = e.touches[0].clientX
+        lastTouchY = e.touches[0].clientY
+      }
     }
 
-    window.addEventListener('mousedown', onMouseDown)
-    window.addEventListener('mouseup', onMouseUp)
-    window.addEventListener('mousemove', onMouseMove)
+    const onTouchMove = (e: TouchEvent) => {
+      if (e.touches.length === 1 && lastTouchX !== null && lastTouchY !== null && gameMode === EGameMode.Follow) {
+        const touch = e.touches[0]
+        const deltaX = touch.clientX - lastTouchX
+        const deltaY = touch.clientY - lastTouchY
+        setYaw((prev) => prev - deltaX * touchSensitivity.yaw)
+        setPitch((prev) => {
+          const next = prev + deltaY * touchSensitivity.pitch
+          return Math.max(minPitch, Math.min(maxPitch, next))
+        })
+        lastTouchX = touch.clientX
+        lastTouchY = touch.clientY
+      }
+    }
+
+    const onTouchEnd = () => {
+      lastTouchX = null
+      lastTouchY = null
+    }
+
+    window.addEventListener('touchstart', onTouchStart)
+    window.addEventListener('touchmove', onTouchMove)
+    window.addEventListener('touchend', onTouchEnd)
+
     return () => {
-      window.removeEventListener('mousedown', onMouseDown)
-      window.removeEventListener('mouseup', onMouseUp)
-      window.removeEventListener('mousemove', onMouseMove)
+      window.removeEventListener('touchstart', onTouchStart)
+      window.removeEventListener('touchmove', onTouchMove)
+      window.removeEventListener('touchend', onTouchEnd)
+    }
+  }, [gameMode, touchSensitivity])
+
+  // request pointer lock for desktop
+  useEffect(() => {
+    if (isMb) return
+    // When entering Follow mode, request pointer lock
+    if (gameMode === EGameMode.Follow) {
+      // Try to request pointer lock
+      if (document.pointerLockElement !== document.body) {
+        document.body.requestPointerLock()
+      }
+    } else {
+      // Exit pointer lock if leaving Follow mode
+      if (document.pointerLockElement === document.body) {
+        document.exitPointerLock()
+      }
+    }
+  }, [gameMode])
+
+  //set game mode to normal when pointer lock is lost (change tab or something)
+  useEffect(() => {
+    const onPointerLockChange = () => {
+      if (document.pointerLockElement !== document.body) {
+        // Pointer lock is lost!
+        console.log('Pointer lock lost')
+        setGameMode(EGameMode.Normal)
+        // You can set a state here to show a "Click to resume" overlay, pause the game, etc.
+      } else {
+        // Pointer lock is active
+        console.log('Pointer lock active')
+      }
+    }
+
+    document.addEventListener('pointerlockchange', onPointerLockChange)
+
+    return () => {
+      document.removeEventListener('pointerlockchange', onPointerLockChange)
     }
   }, [])
+
+  //pc camera control
+  useEffect(() => {
+    if (isMb) return
+    // Handler for mouse movement using pointer lock
+    const onMouseMove = (e: MouseEvent) => {
+      if (gameMode !== EGameMode.Follow) return
+      setYaw((prev) => prev - e.movementX * mouseSensitivity.yaw)
+      setPitch((prev) => {
+        const next = prev + e.movementY * mouseSensitivity.pitch //invert y movement
+        return Math.max(minPitch, Math.min(maxPitch, next))
+      })
+      console.log({
+        yaw,
+        pitch,
+        movementX: e.movementX,
+        movementY: e.movementY,
+      })
+    }
+
+    window.addEventListener('mousemove', onMouseMove)
+
+    return () => {
+      window.removeEventListener('mousemove', onMouseMove)
+    }
+  }, [gameMode, mouseSensitivity])
 
   const { camera } = useThree()
   const setFollowCameraFunc = useBoundStore((state) => state.setFollowCameraFunc)
 
   // TODO: groud y level should be dynamic based on the map
   // For now, we assume a flat ground at y = 0
-  const groundY = 0 // Set this to your map's ground Y level
-  // const { rapier, world } = useRapier()
-  // function getHighestYWithRapier(x: number, z: number) {
-  //   // Start high above the camera's X/Z
-  //   const rayOrigin = { x, y: 1000, z }
-  //   const rayDir = { x: 0, y: -1, z: 0 }
-  //   const ray = new rapier.Ray(rayOrigin, rayDir)
-  //   // Cast the ray down, max distance 2000 units
-  //   const hit = world.castRay(ray, 2000, true)
-  //   if (hit && hit.timeOfImpact !== undefined) {
-  //     // Get the intersection point
-  //     return rayOrigin.y + rayDir.y * hit.timeOfImpact
-  //   }
-  //   return -Infinity // or a sensible default
-  // }
+  // const groundY = 0 // Set this to your map's ground Y level
+  const { rapier, world } = useRapier()
+  function getHighestYWithRapier(x: number, z: number) {
+    // Start high above the camera's X/Z
+    const rayOrigin = { x, y: 1000, z }
+    const rayDir = { x: 0, y: -1, z: 0 }
+    const ray = new rapier.Ray(rayOrigin, rayDir)
+    // Cast the ray down, max distance 2000 units
+    const hit = world.castRay(ray, 2000, true)
+    if (hit && hit.timeOfImpact !== undefined) {
+      // Get the intersection point
+      return rayOrigin.y + rayDir.y * hit.timeOfImpact
+    }
+    return -Infinity // or a sensible default
+  }
 
-// TODO: implement recentering camera when player is moving
-  
+  //logic for camera follow player
   const followCamera = useCallback(
     (delta: number) => {
       // console.log('followCamera')
@@ -119,10 +203,10 @@ const Camera = ({ player }: CameraProps) => {
       const x = playerPosition.x + radius * Math.sin(yaw) * Math.cos(pitch)
       const z = playerPosition.z + radius * Math.cos(yaw) * Math.cos(pitch)
 
-      if (y < groundY + 1) y = groundY + 1 // "+ 1" keeps camera slightly above ground
+      // if (y < groundY + 1) y = groundY + 1 // "+ 1" keeps camera slightly above ground
 
-      // const terrainY = getHighestYWithRapier(x, z)
-      // if (y < terrainY + 1) y = terrainY + 1
+      const terrainY = getHighestYWithRapier(x, z)
+      if (y < terrainY + 1) y = terrainY + 1
 
       const sphericalPosition = new THREE.Vector3(x, y, z)
 
@@ -147,21 +231,20 @@ const Camera = ({ player }: CameraProps) => {
     [player, camera, smoothCameraPosition, smoothCameraTarget, yaw, pitch, cameraDistance, height],
   )
 
-  const gameMode = useBoundStore((state) => state.game.mode)
   //Register followCamera in store
   useEffect(() => {
     setFollowCameraFunc(followCamera)
     return () => setFollowCameraFunc(null) // Cleanup
   }, [followCamera, setFollowCameraFunc])
 
-  useEffect(() => {
-    if (gameMode === EGameMode.Follow) {
-      //hiden cursor
-      document.body.style.cursor = 'none'
-    } else {
-      document.body.style.cursor = 'default'
-    }
-  }, [gameMode])
+  const setGameMode = useBoundStore((state) => state.setGameMode)
+
+  // //set game mode to follow
+  // useEffect(() => {
+  //   if (isMb) {
+  //     setGameMode(EGameMode.Follow)
+  //   }
+  // }, [])
 
   return (
     <>
