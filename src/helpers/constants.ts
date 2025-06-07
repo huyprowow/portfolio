@@ -8,4 +8,5 @@ export enum Controls {
   right = 'right',
   jump = 'jump',
   changeCamera = 'changeCamera',
+  changeMode = 'changeMode',
 }

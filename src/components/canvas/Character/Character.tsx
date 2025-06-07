@@ -27,12 +27,16 @@ import { useDebugMode } from '@/hooks/useDebugMode'
 import { matchesGlob } from 'path'
 import { useAnimationModel } from '@/hooks/useAnimationModel'
 import characterSetting from '@/settings/df_character_setting.json'
+import { mobileAndTabletCheck } from '@/helpers/mobileAndTabletCheck'
+import { EGameMode } from '@/constant/enum'
 
 console.log(characterSetting)
 interface CharacterProps {
   // Add any props if needed
-  orbit: boolean
+  // orbit: boolean
+  // setOrbit: ({ orbit }: { orbit: boolean }) => void
 }
+
 const Character: React.FC<CharacterProps> = (props) => {
   const group = useRef(null)
   const nodes = useLoader(FBXLoader, Assets.CHARACTER)
@@ -42,20 +46,20 @@ const Character: React.FC<CharacterProps> = (props) => {
   const playerCollideHalfHeight = 4
   const { rapier, world } = useRapier()
   const isDebugMode = useDebugMode()
-  const { helmet, shield, sword } = useControls('Character Setting', {
-    helmet: {
-      value: true,
-      label: 'Helmet',
-    },
-    shield: {
-      value: true,
-      label: 'Shield',
-    },
-    sword: {
-      value: true,
-      label: 'Sword',
-    },
-  })
+  // const { helmet, shield, sword } = useControls('Character Setting', {
+  //   helmet: {
+  //     value: true,
+  //     label: 'Helmet',
+  //   },
+  //   shield: {
+  //     value: true,
+  //     label: 'Shield',
+  //   },
+  //   sword: {
+  //     value: true,
+  //     label: 'Sword',
+  //   },
+  // })
 
   const [subscribeKeys, getKeys] = useKeyboardControls()
   const followCameraFunc = useBoundStore((state) => state.followCameraFunc)
@@ -175,7 +179,7 @@ const Character: React.FC<CharacterProps> = (props) => {
     const hit = world.castRay(ray, maxTimeOfImpact, true)
 
     if (hit?.timeOfImpact < 1) {
-      const impulse = new THREE.Vector3(0, 500, 0)
+      const impulse = new THREE.Vector3(0, 220, 0)
       player.current.applyImpulse(impulse, true)
     }
 
@@ -199,7 +203,7 @@ const Character: React.FC<CharacterProps> = (props) => {
       // Remove the debug ray after 1 second
       setTimeout(() => {
         scene.remove(debugRay)
-      }, 1000)
+      }, timeToIdle)
     }
 
     // Play jump animation ONCE and clamp when finished
@@ -222,42 +226,33 @@ const Character: React.FC<CharacterProps> = (props) => {
   const moveCharacter = ({ forward, back, left, right, deltaTime }) => {
     console.log('move')
     if (!player.current) return
-    const impulse = new THREE.Vector3(0, 0, 0)
-    const torque = new THREE.Vector3(0, 0, 0)
-    const impulseStrength = 13 * player.current.mass() * deltaTime
-    const torqueStrength = 4 * player.current.mass() * deltaTime
-    if (forward) {
-      impulse.z += impulseStrength
-    }
-    if (back) {
-      impulse.z -= impulseStrength
-    }
-    if (left) {
-      impulse.x += impulseStrength
-    }
-    if (right) {
-      impulse.x -= impulseStrength
-    }
+    const maxSpeed = characterSetting.control.normalSpeed // Adjust as needed for your game feel
+    const velocity = player.current.linvel()
+    let newVel = { x: 0, y: velocity.y, z: 0 }
 
-    player.current.applyImpulse(impulse, true)
+    if (forward) newVel.z += maxSpeed
+    if (back) newVel.z -= maxSpeed
+    if (left) newVel.x += maxSpeed
+    if (right) newVel.x -= maxSpeed
+
+    player.current.setLinvel(newVel, true)
     setCurrentAction(characterSetting.animation.walk.name)
   }
+  const isMb = mobileAndTabletCheck()
 
   const idleTimeout = useRef<NodeJS.Timeout | null>(null)
+  const timeToIdle = isMb ? characterSetting.control.timeToIdle.MB : characterSetting.control.timeToIdle.PC
   const prevKeys = useRef({ forward: false, back: false, left: false, right: false, jump: false })
+  const gameMode = useBoundStore((state) => state.game.mode)
+
   useFrame((state, delta) => {
-    const { forward, back, left, right } = getKeys()
     const keys = getKeys()
     const isMoving = keys.forward || keys.back || keys.left || keys.right
-    const justStartedMoving =
-      isMoving &&
-      !(prevKeys.current.forward || prevKeys.current.back || prevKeys.current.left || prevKeys.current.right)
-    const justStoppedMoving =
-      !isMoving &&
-      (prevKeys.current.forward || prevKeys.current.back || prevKeys.current.left || prevKeys.current.right)
+    const wasMoving =
+      prevKeys.current.forward || prevKeys.current.back || prevKeys.current.left || prevKeys.current.right
 
-    if (justStartedMoving) {
-      // Cancel any pending idle transition
+    if (isMoving && !wasMoving) {
+      // Started moving
       if (idleTimeout.current) {
         clearTimeout(idleTimeout.current)
         idleTimeout.current = null
@@ -266,13 +261,14 @@ const Character: React.FC<CharacterProps> = (props) => {
         clearTimeout(jumpTimeout.current)
         jumpTimeout.current = null
       }
-      setCurrentAction(characterSetting.animation.walk.name)
-    } else if (justStoppedMoving) {
-      // Stop movement instantly
+      if (currentAction !== characterSetting.animation.walk.name) {
+        setCurrentAction(characterSetting.animation.walk.name)
+      }
+    } else if (!isMoving && wasMoving) {
+      // Stopped moving
       if (player.current) {
         player.current.setLinvel({ x: 0, y: player.current.linvel().y, z: 0 }, true)
       }
-      // Let walk animation finish its current loop and hold last frame
       const walkAction = actionMap.get(characterSetting.animation.walk.name)
       if (walkAction) {
         walkAction.setLoop(THREE.LoopOnce, 1)
@@ -281,39 +277,37 @@ const Character: React.FC<CharacterProps> = (props) => {
           walkAction.reset().play()
         }
       }
-      setCurrentAction(characterSetting.animation.walk.name)
-      // Set a timeout to transition to idle after 300ms
+      // Only set to idle after a timeout
       idleTimeout.current = setTimeout(() => {
         setCurrentAction(characterSetting.animation.idle.name)
         idleTimeout.current = null
-      }, 1000)
+      }, timeToIdle)
     }
-
-    if (forward || back || left || right) {
+    if (isMoving) {
       rotateCharacter({
-        forward,
-        left,
-        right,
-        backward: back,
+        forward: keys.forward,
+        left: keys.left,
+        right: keys.right,
+        backward: keys.back,
       })
       moveCharacter({
-        forward,
-        back,
-        left,
-        right,
+        forward: keys.forward,
+        back: keys.back,
+        left: keys.left,
+        right: keys.right,
         deltaTime: delta,
       })
     }
-    //follow camera
+   // follow camera
     if (followCameraFunc) {
-      if (!props.orbit) {
-        followCameraFunc(delta)
-      }
+      followCameraFunc(delta)
     }
 
     mixer.update(delta)
     prevKeys.current = keys
   })
+
+  
   return (
     <group ref={group} {...props} dispose={null} rotation={[0, 0, 0]}>
       <Camera player={player} />

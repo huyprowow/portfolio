@@ -36,5 +36,14 @@
     "crouchIdle": {
       "name": "SWORD_AND_SHIELD_CROUCH_IDLE"
     }
+  },
+  "control": {
+    "timeToIdle": {
+      "PC": 500,
+      "MB": 300
+    },
+    "fadeInAnimationTime": 0.1,
+    "fadeOutAnimationTime": 0.1,
+    "normalSpeed": 13
   }
 }

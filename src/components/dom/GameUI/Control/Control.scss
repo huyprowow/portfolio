@@ -1,0 +1,49 @@
+.controls {
+  position: absolute;
+  bottom: 1%;
+
+  left: 0;
+  width: 100%;
+  display: flex;
+  .key {
+    pointer-events: auto;
+    cursor: pointer;
+    width: 40px;
+    height: 40px;
+    margin: 4px;
+    border: 2px solid #ffffff;
+    justify-content: center;
+    align-items: center;
+    display: flex;
+    color: #ffffff;
+    background: #ffffff44;
+    &.large {
+      width: 144px;
+    }
+    &.active {
+      background: #9df8619c;
+    }
+    &.round {
+      border-radius: 50%;
+    }
+  }
+
+  .move {
+    max-width: min-content;
+    padding: 10px;
+    .raw {
+      display: flex;
+      justify-content: center;
+    }
+  }
+  .mode {
+    display: flex;
+    justify-content: bottom;
+    align-items: flex-end;
+    margin-bottom: 10px;
+    .key {
+      width: 65px;
+      height: 65px;
+    }
+  }
+}

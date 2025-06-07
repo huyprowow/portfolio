@@ -14,6 +14,7 @@ import Room from '../components/canvas/Map/Room'
 import Ground from '../components/canvas/Map/Ground'
 import { useControls } from 'leva'
 import Character from '@/components/canvas/Character/Character'
+import UI from '@/components/dom/UI'
 
 const startDebug = () => {
   const hash = window.location.hash
@@ -27,9 +28,9 @@ export default function Home() {
   const visible = usePageVisible()
   const isDebugMode = useDebugMode()
 
-  const { orbit } = useControls('Camera', {
-    orbit: false,
-  })
+  // const [{ orbit }, setOrbit] = useControls('Camera', () => ({
+  //   orbit: false,
+  // }))
 
   useEffect(() => {
     if (!isDebugMode) {
@@ -45,6 +46,7 @@ export default function Home() {
       { name: Controls.right, keys: ['ArrowRight', 'KeyD'] },
       { name: Controls.jump, keys: ['Space'] },
       { name: Controls.changeCamera, keys: ['KeyC'] },
+      { name: Controls.changeMode, keys: ['KeyF'] },
     ],
     [],
   )
@@ -53,14 +55,15 @@ export default function Home() {
     <>
       <DebugUI />
       <KeyboardControls map={map}>
-        <SceneView orbit={orbit} className='relative h-full sm:w-full'>
+        <UI />
+        <SceneView  className='relative h-full sm:w-full'>
           <SceneCommon color='#000000' />
           <Sky />
           {/* <Camera /> */}
           <Physics debug={isDebugMode} gravity={[0, -9.8, 0]} timeStep='vary' paused={!visible || loading}>
             <Ground />
             {/* <Room /> */}
-            <Character orbit={orbit} />
+            <Character  />
 
             {isDebugMode && (
               <>

@@ -65,7 +65,7 @@ export const useAnimationModel = ({ player }: IProps) => {
     action.reset()
     action.setLoop(loopMode, Infinity)
     action.clampWhenFinished = true
-    action.fadeIn(0.15).play()
+    action.fadeIn(characterSetting.control.fadeInAnimationTime).play()
   }
   useEffect(() => {
     const action = currentAction ? actionMap.get(currentAction) : actionMap.get(characterSetting.animation.idle.name)
@@ -77,7 +77,7 @@ export const useAnimationModel = ({ player }: IProps) => {
       playAction(action, loopMode)
     }
     return () => {
-      action?.fadeOut(0.1)
+      action?.fadeOut(characterSetting.control.fadeOutAnimationTime)
     }
   }, [currentAction])
 

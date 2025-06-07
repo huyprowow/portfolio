@@ -44,4 +44,11 @@ export default defineConfig({
       target: 'esnext',
     },
   },
+  css: {
+    preprocessorOptions: {
+      scss: {
+        api: 'modern-compiler', // or "modern"
+      },
+    },
+  },
 })
