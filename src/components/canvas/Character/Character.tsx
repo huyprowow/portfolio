@@ -33,8 +33,7 @@ import { EGameMode } from '@/constant/enum'
 console.log(characterSetting)
 interface CharacterProps {
   // Add any props if needed
-  // orbit: boolean
-  // setOrbit: ({ orbit }: { orbit: boolean }) => void
+  orbit: boolean
 }
 
 const Character: React.FC<CharacterProps> = (props) => {
@@ -220,26 +219,53 @@ const Character: React.FC<CharacterProps> = (props) => {
     // Set jump timeout to return to idle after jump animation
     const jumpDuration = jumpAction?.getClip().duration ?? 1
     jumpTimeout.current = setTimeout(() => {
-      setCurrentAction(characterSetting.animation.idle.name)
+      const keys = getKeys()
+      const isMoving = keys.forward || keys.back || keys.left || keys.right
+      if (isMoving) {
+        setCurrentAction(characterSetting.animation.walk.name)
+      } else {
+        setCurrentAction(characterSetting.animation.idle.name)
+      }
       jumpTimeout.current = null
     }, jumpDuration * 1000)
   }
+
   // TODO: solve move character and camera direction
-
   const moveCharacter = ({ forward, back, left, right, deltaTime }) => {
-    console.log('move')
     if (!player.current) return
-    const maxSpeed = characterSetting.control.normalSpeed // Adjust as needed for your game feel
+    const maxSpeed = characterSetting.control.normalSpeed
     const velocity = player.current.linvel()
-    let newVel = { x: 0, y: velocity.y, z: 0 }
 
-    if (forward) newVel.z += maxSpeed
-    if (back) newVel.z -= maxSpeed
-    if (left) newVel.x += maxSpeed
-    if (right) newVel.x -= maxSpeed
+    // 1. Get camera's forward and right vectors (projected to XZ)
+    const cameraDirection = new THREE.Vector3()
+    camera.getWorldDirection(cameraDirection)
+    cameraDirection.y = 0
+    cameraDirection.normalize()
 
-    player.current.setLinvel(newVel, true)
-    setCurrentAction(characterSetting.animation.walk.name)
+    const cameraRight = new THREE.Vector3()
+    cameraRight.crossVectors(cameraDirection, new THREE.Vector3(0, 1, 0)).normalize()
+
+    // 2. Build movement direction
+    let moveDir = new THREE.Vector3()
+    if (forward) moveDir.add(cameraDirection)
+    if (back) moveDir.sub(cameraDirection)
+    if (left) moveDir.sub(cameraRight)
+    if (right) moveDir.add(cameraRight)
+
+    if (moveDir.lengthSq() > 0) {
+      moveDir.normalize()
+      // 3. Set velocity in the direction
+      moveDir.multiplyScalar(maxSpeed)
+      player.current.setLinvel({ x: moveDir.x, y: velocity.y, z: moveDir.z }, true)
+
+      // 4. Rotate player to face movement direction
+      const targetRotation = Math.atan2(moveDir.x, moveDir.z)
+      const currentRotation = player.current.rotation()
+      const quaternion = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), targetRotation)
+      player.current.setRotation(quaternion, true)
+
+      setCurrentAction(characterSetting.animation.walk.name)
+    }
   }
   const isMb = mobileAndTabletCheck()
 
@@ -260,9 +286,13 @@ const Character: React.FC<CharacterProps> = (props) => {
         clearTimeout(idleTimeout.current)
         idleTimeout.current = null
       }
+      // --- FIX: Interrupt jump if moving during jump ---
       if (jumpTimeout.current) {
         clearTimeout(jumpTimeout.current)
         jumpTimeout.current = null
+        if (currentAction === characterSetting.animation.jump.name) {
+          setCurrentAction(characterSetting.animation.walk.name)
+        }
       }
       if (currentAction !== characterSetting.animation.walk.name) {
         setCurrentAction(characterSetting.animation.walk.name)
@@ -303,6 +333,9 @@ const Character: React.FC<CharacterProps> = (props) => {
     }
     // follow camera
     if (followCameraFunc) {
+      if (props.orbit) {
+        return
+      }
       followCameraFunc(delta)
     }
 
@@ -312,7 +345,7 @@ const Character: React.FC<CharacterProps> = (props) => {
 
   return (
     <group ref={group} {...props} dispose={null} rotation={[0, 0, 0]}>
-      <Camera player={player} />
+      <Camera player={player} setOrbit={props.setOrbit} />
       <RigidBody canSleep={false} colliders={false} ref={player} lockRotations={true}>
         <primitive object={nodes} scale={0.1}></primitive>
         {/* <mesh geometry={nodes.children[0].geometry} material={nodes.children[0].material} scale={0.1}></mesh> */}

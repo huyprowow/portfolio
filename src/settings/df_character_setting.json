@@ -39,7 +39,7 @@
   },
   "control": {
     "timeToIdle": {
-      "PC": 500,
+      "PC": 50,
       "MB": 300
     },
     "fadeInAnimationTime": 0.1,

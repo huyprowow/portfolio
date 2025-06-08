@@ -62,10 +62,10 @@ const OrbitView = ({ target }: { target?: THREE.Vector3 }) => {
   return <OrbitControls camera={camera} target={cameraTarget} />
 }
 
-export function SceneView({ children, orbit = false, className = '', target }: ViewProps) {
+export function SceneView({ children, orbit = true, className = '', target }: ViewProps) {
   return (
     <Canvas className={className}>
-      {/* {orbit ? <OrbitView target={target} /> : null} */}
+      {orbit ? <OrbitView target={target} /> : null}
       {children}
     </Canvas>
   )

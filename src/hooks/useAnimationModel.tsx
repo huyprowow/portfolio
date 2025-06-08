@@ -8,6 +8,7 @@ import { AnimationAction, AnimationMixer } from 'three'
 import { FBXLoader } from 'three-stdlib'
 import characterSetting from '@/settings/df_character_setting.json'
 import * as THREE from 'three'
+import usePrevious from './usePrevious'
 
 interface IProps {
   player: any
@@ -16,6 +17,7 @@ interface IProps {
 export const useAnimationModel = ({ player }: IProps) => {
   const [subscribeKeys, getKeys] = useKeyboardControls()
   const [currentAction, setCurrentAction] = useState('')
+  const previousAction = usePrevious(currentAction)
 
   const animationLinks = Assets.ANIMATION
   // Load all FBX files (one per animation)
@@ -73,9 +75,20 @@ export const useAnimationModel = ({ player }: IProps) => {
       let loopMode: THREE.AnimationActionLoopStyles = THREE.LoopRepeat
       if (currentAction === characterSetting.animation.jump.name) {
         loopMode = THREE.LoopOnce
+        
       }
       playAction(action, loopMode)
     }
+    //get previous state
+    // console.log({
+    //   currentAction,
+    //   previousAction,
+    // })
+
+    // if (previousAction && previousAction !== currentAction) {
+    //   actionMap.get(previousAction)?.fadeOut(characterSetting.control.fadeOutAnimationTime)
+    // }
+
     return () => {
       action?.fadeOut(characterSetting.control.fadeOutAnimationTime)
     }

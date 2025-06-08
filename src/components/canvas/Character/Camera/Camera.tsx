@@ -29,6 +29,7 @@ const Camera = ({ player }: CameraProps) => {
       const euler = new THREE.Euler().setFromQuaternion(new THREE.Quaternion(rot.x, rot.y, rot.z, rot.w))
       setYaw(euler.y + Math.PI) // Behind player
     }
+
     // Only run on mount
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
@@ -240,11 +241,11 @@ const Camera = ({ player }: CameraProps) => {
   const setGameMode = useBoundStore((state) => state.setGameMode)
 
   // //set game mode to follow
-  // useEffect(() => {
-  //   if (isMb) {
-  //     setGameMode(EGameMode.Follow)
-  //   }
-  // }, [])
+  useEffect(() => {
+    if (isMb) {
+      setGameMode(EGameMode.Follow)
+    }
+  }, [])
 
   return (
     <>

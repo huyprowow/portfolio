@@ -58,4 +58,5 @@ export const Assets = {
     SWORD_AND_SHIELD_WALK_2: 'assets/Pro_Sword_and_Shield_Pack/sword_and_shield_walk_2.fbx',
     SWORD_AND_SHIELD_WALK: 'assets/Pro_Sword_and_Shield_Pack/sword_and_shield_walk.fbx',
   },
+  CAMPFIRE: 'assets/Map/campfire.glb',
 }

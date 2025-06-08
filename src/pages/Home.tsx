@@ -15,6 +15,7 @@ import Ground from '../components/canvas/Map/Ground'
 import { useControls } from 'leva'
 import Character from '@/components/canvas/Character/Character'
 import UI from '@/components/dom/UI'
+import Campfire from '@/components/canvas/Map/Campfire'
 
 const startDebug = () => {
   const hash = window.location.hash
@@ -28,9 +29,9 @@ export default function Home() {
   const visible = usePageVisible()
   const isDebugMode = useDebugMode()
 
-  // const [{ orbit }, setOrbit] = useControls('Camera', () => ({
-  //   orbit: false,
-  // }))
+  const [{ orbit }, setOrbit] = useControls('Camera', () => ({
+    orbit: false,
+  }))
 
   useEffect(() => {
     if (!isDebugMode) {
@@ -56,14 +57,15 @@ export default function Home() {
       <DebugUI />
       <KeyboardControls map={map}>
         <UI />
-        <SceneView  className='relative h-full sm:w-full'>
+        <SceneView className='relative h-full sm:w-full' orbit={orbit}>
           <SceneCommon color='#000000' />
           <Sky />
           {/* <Camera /> */}
           <Physics debug={isDebugMode} gravity={[0, -9.8, 0]} timeStep='vary' paused={!visible || loading}>
             <Ground />
+            <Campfire />
             {/* <Room /> */}
-            <Character  />
+            <Character orbit={orbit} />
 
             {isDebugMode && (
               <>
