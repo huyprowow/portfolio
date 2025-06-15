@@ -16,6 +16,8 @@ import { useControls } from 'leva'
 import Character from '@/components/canvas/Character/Character'
 import UI from '@/components/dom/UI'
 import Campfire from '@/components/canvas/Map/Campfire'
+import { Tent } from '@/components/canvas/Map/Tent'
+import WoodBlock from '@/components/canvas/Map/WoodBlock'
 
 const startDebug = () => {
   const hash = window.location.hash
@@ -64,6 +66,8 @@ export default function Home() {
           <Physics debug={isDebugMode} gravity={[0, -9.8, 0]} timeStep='vary' paused={!visible || loading}>
             <Ground />
             <Campfire />
+            <Tent />
+            <WoodBlock />
             {/* <Room /> */}
             <Character orbit={orbit} />
 

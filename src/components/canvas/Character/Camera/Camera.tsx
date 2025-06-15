@@ -8,6 +8,11 @@ import { useFrame, useThree } from '@react-three/fiber'
 import { RapierRigidBody, useRapier } from '@react-three/rapier'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import * as THREE from 'three'
+import cameraSetting from '@/settings/df_camera_setting.json'
+import { calculateCombineMask } from '@/helpers/calculateCombineMask'
+import useSetting from '@/hooks/useSetting'
+import { useDebugMode } from '@/hooks/useDebugMode'
+import characterSetting from '@/settings/df_character_setting.json'
 
 interface CameraProps {
   player: React.RefObject<RapierRigidBody>
@@ -18,9 +23,10 @@ const Camera = ({ player }: CameraProps) => {
   const [smoothCameraTarget] = useState(() => new THREE.Vector3(0, 0, 0))
   const tmpCameraPosition = useRef(new THREE.Vector3())
   const tmpCameraTarget = useRef(new THREE.Vector3())
-  const height = 14
-  const cameraDistance = 26
+  const height = cameraSetting.height.default
+  const cameraDistance = cameraSetting.distance.default
   const gameMode = useBoundStore((state) => state.game.mode)
+  const { collision_group } = useSetting()
 
   // setting camera behind player first time
   useEffect(() => {
@@ -45,14 +51,8 @@ const Camera = ({ player }: CameraProps) => {
    */
   const [yaw, setYaw] = useState(Math.PI) // Start in behind the player
   const [pitch, setPitch] = useState(0)
-  const mouseSensitivity = {
-    yaw: 0.0005,
-    pitch: 0.00025,
-  }
-  const touchSensitivity = {
-    yaw: 0.088,
-    pitch: 0.033,
-  }
+  const mouseSensitivity: { yaw: number; pitch: number } = cameraSetting.mouseSensitivity
+  const touchSensitivity: { yaw: number; pitch: number } = cameraSetting.touchSensitivity
 
   /***
    * way to update yaw and pitch
@@ -170,26 +170,47 @@ const Camera = ({ player }: CameraProps) => {
     }
   }, [gameMode, mouseSensitivity])
 
-  const { camera } = useThree()
+  const { camera, scene } = useThree()
   const setFollowCameraFunc = useBoundStore((state) => state.setFollowCameraFunc)
-
+  const isDebugMode = useDebugMode()
   // TODO: groud y level should be dynamic based on the map
   // For now, we assume a flat ground at y = 0
   // const groundY = 0 // Set this to your map's ground Y level
   const { rapier, world } = useRapier()
   function getHighestYWithRapier(x: number, z: number) {
     // Start high above the camera's X/Z
-    const rayOrigin = { x, y: 1000, z }
+    let maxTimeOfImpact = 1000
+    if (inHouse) {
+      maxTimeOfImpact = characterSetting.collision.radius * 2
+    }
+    const rayOrigin = { x, y: maxTimeOfImpact, z }
     const rayDir = { x: 0, y: -1, z: 0 }
     const ray = new rapier.Ray(rayOrigin, rayDir)
     // Cast the ray down, max distance 2000 units
-    const hit = world.castRay(ray, 2000, true)
+    const hit = world.castRay(ray, maxTimeOfImpact, true)
+
+    if (isDebugMode) {
+      const debugRay = new THREE.Line(
+        new THREE.BufferGeometry().setFromPoints([
+          new THREE.Vector3(rayOrigin.x, rayOrigin.y, rayOrigin.z),
+          new THREE.Vector3(rayOrigin.x, rayOrigin.y - maxTimeOfImpact, rayOrigin.z),
+        ]),
+        new THREE.LineBasicMaterial({ color: 0xff0000 }),
+      )
+      scene.add(debugRay)
+      setTimeout(() => {
+        scene.remove(debugRay)
+      }, 1000)
+    }
+
     if (hit && hit.timeOfImpact !== undefined) {
       // Get the intersection point
       return rayOrigin.y + rayDir.y * hit.timeOfImpact
     }
     return -Infinity // or a sensible default
   }
+
+  const inHouse = useBoundStore((state) => state.inHouse)
 
   //logic for camera follow player
   const followCamera = useCallback(
@@ -199,7 +220,7 @@ const Camera = ({ player }: CameraProps) => {
       const playerPosition = player.current.translation()
 
       // Spherical coordinates for orbit
-      const radius = cameraDistance
+      const radius = inHouse ? cameraSetting.distance.inHouse : cameraDistance
       let y = playerPosition.y + height + radius * Math.sin(pitch)
       const x = playerPosition.x + radius * Math.sin(yaw) * Math.cos(pitch)
       const z = playerPosition.z + radius * Math.cos(yaw) * Math.cos(pitch)
@@ -207,7 +228,7 @@ const Camera = ({ player }: CameraProps) => {
       // if (y < groundY + 1) y = groundY + 1 // "+ 1" keeps camera slightly above ground
 
       const terrainY = getHighestYWithRapier(x, z)
-      if (y < terrainY + 1) y = terrainY + 1
+      if (y < terrainY + 0.01) y = terrainY + 0.01
 
       const sphericalPosition = new THREE.Vector3(x, y, z)
 
@@ -223,13 +244,14 @@ const Camera = ({ player }: CameraProps) => {
       //   cameraPosition,
       //   cameraTarget,
       // })
-      smoothCameraPosition.lerp(cameraPosition, 5 * delta)
-      smoothCameraTarget.lerp(cameraTarget, 5 * delta)
+      const lerpMultiplier = 5
+      smoothCameraPosition.lerp(cameraPosition, lerpMultiplier * delta)
+      smoothCameraTarget.lerp(cameraTarget, lerpMultiplier * delta)
 
       camera.position.copy(smoothCameraPosition)
       camera.lookAt(smoothCameraTarget)
     },
-    [player, camera, smoothCameraPosition, smoothCameraTarget, yaw, pitch, cameraDistance, height],
+    [player, camera, smoothCameraPosition, smoothCameraTarget, yaw, pitch, cameraDistance, height, inHouse],
   )
 
   //Register followCamera in store

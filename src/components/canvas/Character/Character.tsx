@@ -42,7 +42,7 @@ const Character: React.FC<CharacterProps> = (props) => {
   const setCharacter = useBoundStore((state) => state.setCharacter)
   const player = useRef<RapierRigidBody>(null)
   const { controls, camera, scene } = useThree((state) => state)
-  const playerCollideHalfHeight = 4
+  const playerCollideHalfHeight = characterSetting.collision.halfHeight
   const { rapier, world } = useRapier()
   const isDebugMode = useDebugMode()
   // const { helmet, shield, sword } = useControls('Character Setting', {
@@ -59,6 +59,12 @@ const Character: React.FC<CharacterProps> = (props) => {
   //     label: 'Sword',
   //   },
   // })
+
+  const setPlayerRef = useBoundStore((state) => state.setPlayerRef)
+
+  useEffect(() => {
+    if (setPlayerRef) setPlayerRef(player)
+  }, [player, setPlayerRef])
 
   const [subscribeKeys, getKeys] = useKeyboardControls()
   const followCameraFunc = useBoundStore((state) => state.followCameraFunc)
@@ -345,7 +351,7 @@ const Character: React.FC<CharacterProps> = (props) => {
 
   return (
     <group ref={group} {...props} dispose={null} rotation={[0, 0, 0]}>
-      <Camera player={player} setOrbit={props.setOrbit} />
+      <Camera player={player} />
       <RigidBody canSleep={false} colliders={false} ref={player} lockRotations={true}>
         <primitive object={nodes} scale={0.1}></primitive>
         {/* <mesh geometry={nodes.children[0].geometry} material={nodes.children[0].material} scale={0.1}></mesh> */}
@@ -359,8 +365,8 @@ const Character: React.FC<CharacterProps> = (props) => {
         {sword && <mesh geometry={nodes.children[4].geometry} material={nodes.children[4].material} scale={0.1}></mesh>} */}
 
         <CapsuleCollider
-          args={[playerCollideHalfHeight, 5]}
-          position={[0, playerCollideHalfHeight + 5, 0]}
+          args={[playerCollideHalfHeight, characterSetting.collision.radius]}
+          position={[0, playerCollideHalfHeight + characterSetting.collision.radius, 0]}
           mass={50}
           friction={1}
           restitution={0}

@@ -1,0 +1,19 @@
+{
+  "mouseSensitivity": {
+    "yaw": 0.0005,
+    "pitch": 0.00025
+  },
+  "touchSensitivity": {
+    "yaw": 0.088,
+    "pitch": 0.033
+  },
+
+  "distance": {
+    "inHouse": 8,
+    "default": 26
+  },
+  "height": {
+    "default": 14
+  }
+
+}

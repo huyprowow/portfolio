@@ -45,5 +45,10 @@
     "fadeInAnimationTime": 0.1,
     "fadeOutAnimationTime": 0.1,
     "normalSpeed": 13
+  },
+  "collision": {
+    "halfHeight": 4,
+    "radius": 4
   }
+
 }

@@ -57,6 +57,12 @@ export const Assets = {
     SWORD_AND_SHIELD_TURN: 'assets/Pro_Sword_and_Shield_Pack/sword_and_shield_turn.fbx',
     SWORD_AND_SHIELD_WALK_2: 'assets/Pro_Sword_and_Shield_Pack/sword_and_shield_walk_2.fbx',
     SWORD_AND_SHIELD_WALK: 'assets/Pro_Sword_and_Shield_Pack/sword_and_shield_walk.fbx',
+    SIT_TO_STAND: 'assets/Pro_Sword_and_Shield_Pack/sit_to_stand.fbx',
+    STAND_TO_SIT: 'assets/Pro_Sword_and_Shield_Pack/stand_to_sit.fbx',
+    SITTING_IDLE: 'assets/Pro_Sword_and_Shield_Pack/sitting_idle.fbx',
   },
-  CAMPFIRE: 'assets/Map/campfire.glb',
+  CAMPFIRE: 'assets/Map/h_campfire.glb',
+  CASTLE_WALL: 'assets/Map/castle_wall.glb',
+  TENT: 'assets/Map/tent_modified.glb',
+  WOOD_BLOCK: 'assets/Map/wood_chopping_trunk_base.glb',
 }

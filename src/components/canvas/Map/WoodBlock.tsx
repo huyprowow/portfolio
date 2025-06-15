@@ -3,15 +3,16 @@ import { useLoader } from '@react-three/fiber'
 import { RigidBody } from '@react-three/rapier'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 
-const Campfire = () => {
-  const scene = useLoader(GLTFLoader, Assets.CAMPFIRE)
+const WoodBlock = () => {
+  const scene = useLoader(GLTFLoader, Assets.WOOD_BLOCK)
 
   return (
     <RigidBody type='fixed' colliders='hull'>
-      <primitive object={scene.scene} position={[-10, 0, 40]} scale={0.05} />
+      <primitive object={scene.scene} position={[0, 0, 20]} scale={3} />
     </RigidBody>
   )
 }
 
-export default Campfire
-useLoader.preload(GLTFLoader, Assets.CAMPFIRE)
+export default WoodBlock
+
+useLoader.preload(GLTFLoader, Assets.WOOD_BLOCK)
