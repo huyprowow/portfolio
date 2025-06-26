@@ -61,10 +61,20 @@ const OrbitView = ({ target }: { target?: THREE.Vector3 }) => {
 
   return <OrbitControls camera={camera} target={cameraTarget} />
 }
+const GlSetter = () => {
+  const gl = useThree((state) => state.gl)
+  const setGl = useBoundStore((state) => state.setGl)
 
+  useEffect(() => {
+    setGl(gl)
+  }, [gl, setGl])
+
+  return null
+}
 export function SceneView({ children, orbit = true, className = '', target }: ViewProps) {
   return (
     <Canvas className={className}>
+      <GlSetter />
       {orbit ? <OrbitView target={target} /> : null}
       {children}
     </Canvas>

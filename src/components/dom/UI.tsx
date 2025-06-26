@@ -4,6 +4,7 @@ import Setting from './GameUI/Setting/Setting'
 import { useBoundStore } from '@/store/store'
 import { useKeyboardControls } from '@react-three/drei'
 import { EGameMode } from '@/constant/enum'
+import { SettingDialog } from './GameUI/Setting/SettingDialog'
 
 const UI = () => {
   const gameMode = useBoundStore((state) => state.game.mode)
@@ -16,13 +17,12 @@ const UI = () => {
       (state) => state.changeMode,
       (pressed) => {
         if (pressed) {
-          setGameMode(gameMode===EGameMode.Normal?EGameMode.Follow:EGameMode.Normal)
+          setGameMode(gameMode === EGameMode.Normal ? EGameMode.Follow : EGameMode.Normal)
         }
       },
     )
     return () => unsubscribe()
   }, [changeMode, gameMode, setGameMode, subscribeKeys])
-
 
   return (
     <div
@@ -33,11 +33,13 @@ const UI = () => {
         width: '100%',
         height: '100%',
         pointerEvents: 'none',
-        zIndex: 1000,
+        zIndex: 10000,
       }}
     >
       <Control />
-      <Setting />
+      <SettingDialog >
+        <Setting />
+      </SettingDialog>
     </div>
   )
 }

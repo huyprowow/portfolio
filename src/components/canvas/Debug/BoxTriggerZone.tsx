@@ -2,6 +2,7 @@ import * as THREE from 'three'
 import { useEffect, useRef } from 'react'
 import { useFrame } from '@react-three/fiber'
 import { RapierRigidBody } from '@react-three/rapier'
+import { useDebugMode } from '@/hooks/useDebugMode'
 
 type Props = {
   size: [number, number, number]
@@ -16,6 +17,7 @@ type Props = {
 export const BoxTriggerZone = ({ size, center, playerRef, onEnter, onExit, debug = false, color = 'blue' }: Props) => {
   const wasInside = useRef(false)
   const box = useRef(new THREE.Box3())
+  const isDebugMode = useDebugMode()
 
   // Update Box3 mỗi frame (nếu cần anim hoặc move)
   useEffect(() => {
@@ -47,7 +49,7 @@ export const BoxTriggerZone = ({ size, center, playerRef, onEnter, onExit, debug
     }
   })
 
-  if (!debug) return null
+  if (!debug || !isDebugMode) return null
 
   return (
     <mesh position={center}>

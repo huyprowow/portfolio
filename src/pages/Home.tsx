@@ -1,6 +1,6 @@
 import { Physics } from '@react-three/rapier'
 import { GizmoHelper, GizmoViewport, Sky, Stats } from '@react-three/drei'
-import { useLoadingAssets } from '../templates/hooks/useLoading'
+import { useLoadingAssets } from '../hooks/useLoading'
 import { usePageVisible } from '../hooks/usePageVisible'
 import { SceneView, SceneCommon } from '../components/canvas/View'
 import { useDebugMode } from '../hooks/useDebugMode'
@@ -11,13 +11,14 @@ import { Perf } from 'r3f-perf'
 import { DebugUI } from '../components/canvas/Debug/DebugUI'
 import Camera from '../components/canvas/Character/Camera/Camera'
 import Room from '../components/canvas/Map/Room'
-import Ground from '../components/canvas/Map/Ground'
+import Terrain from '../components/canvas/Map/Terrain'
 import { useControls } from 'leva'
 import Character from '@/components/canvas/Character/Character'
 import UI from '@/components/dom/UI'
 import Campfire from '@/components/canvas/Map/Campfire'
 import { Tent } from '@/components/canvas/Map/Tent'
 import WoodBlock from '@/components/canvas/Map/WoodBlock'
+import { useThree } from '@react-three/fiber'
 
 const startDebug = () => {
   const hash = window.location.hash
@@ -36,7 +37,8 @@ export default function Home() {
   }))
 
   useEffect(() => {
-    if (!isDebugMode) {
+    console.log(import.meta.env.VITE_DEBUG_MODE)
+    if (!isDebugMode && import.meta.env.VITE_DEBUG_MODE) {
       startDebug()
     }
   }, [isDebugMode])
@@ -64,7 +66,7 @@ export default function Home() {
           <Sky />
           {/* <Camera /> */}
           <Physics debug={isDebugMode} gravity={[0, -9.8, 0]} timeStep='vary' paused={!visible || loading}>
-            <Ground />
+            <Terrain />
             <Campfire />
             <Tent />
             <WoodBlock />

@@ -1,0 +1,7 @@
+.glass-effect {
+  -webkit-backdrop-filter: blur(5px) !important;
+  background-color: rgba(255, 255, 255, 0.1) !important; /* Semi-transparent background */
+  backdrop-filter: blur(10px) !important; /* The actual blur effect */
+  border: 1px solid rgba(255, 255, 255, 0.1) !important; /* A subtle border */
+  box-shadow: none !important; /* Override the default shadow */
+}

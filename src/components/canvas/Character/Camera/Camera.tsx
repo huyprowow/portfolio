@@ -13,6 +13,7 @@ import { calculateCombineMask } from '@/helpers/calculateCombineMask'
 import useSetting from '@/hooks/useSetting'
 import { useDebugMode } from '@/hooks/useDebugMode'
 import characterSetting from '@/settings/df_character_setting.json'
+import mapSetting from '@/settings/df_map_setting.json'
 
 interface CameraProps {
   player: React.RefObject<RapierRigidBody>
@@ -155,12 +156,12 @@ const Camera = ({ player }: CameraProps) => {
         const next = prev + e.movementY * mouseSensitivity.pitch //invert y movement
         return Math.max(minPitch, Math.min(maxPitch, next))
       })
-      console.log({
-        yaw,
-        pitch,
-        movementX: e.movementX,
-        movementY: e.movementY,
-      })
+      // console.log({
+      //   yaw,
+      //   pitch,
+      //   movementX: e.movementX,
+      //   movementY: e.movementY,
+      // })
     }
 
     window.addEventListener('mousemove', onMouseMove)
@@ -174,16 +175,20 @@ const Camera = ({ player }: CameraProps) => {
   const setFollowCameraFunc = useBoundStore((state) => state.setFollowCameraFunc)
   const isDebugMode = useDebugMode()
   // TODO: groud y level should be dynamic based on the map
-  // For now, we assume a flat ground at y = 0
-  // const groundY = 0 // Set this to your map's ground Y level
+  // For now, we assume a flat terrain at y = 0
+  // const terrainY = 0 // Set this to your map's terrain Y level
   const { rapier, world } = useRapier()
-  function getHighestYWithRapier(x: number, z: number) {
+  function getTerrainYWithRapier(playerPosition: { x: number; y: number; z: number } = { x: 0, y: 1, z: 0 }) {
     // Start high above the camera's X/Z
-    let maxTimeOfImpact = 1000
-    if (inHouse) {
-      maxTimeOfImpact = characterSetting.collision.radius * 2
+    let maxTimeOfImpact = mapSetting.maxTerrainHeight
+    // if (inHouse) {
+    //   maxTimeOfImpact = characterSetting.collision.radius * 2
+    // }
+    const rayOrigin = {
+      x: playerPosition.x,
+      y: playerPosition.y,
+      z: playerPosition.z,
     }
-    const rayOrigin = { x, y: maxTimeOfImpact, z }
     const rayDir = { x: 0, y: -1, z: 0 }
     const ray = new rapier.Ray(rayOrigin, rayDir)
     // Cast the ray down, max distance 2000 units
@@ -210,6 +215,36 @@ const Camera = ({ player }: CameraProps) => {
     return -Infinity // or a sensible default
   }
 
+  function getCeilingYWithRapier(playerPosition: { x: number; y: number; z: number } = { x: 0, y: 1, z: 0 }) {
+    let maxTimeOfImpact = 1000
+    const rayOrigin = {
+      x: playerPosition.x,
+      y: playerPosition.y + characterSetting.collision.halfHeight * 2 + characterSetting.collision.radius * 2 + 0.01,
+      z: playerPosition.z,
+    }
+    const rayDir = { x: 0, y: 1, z: 0 }
+    const ray = new rapier.Ray(rayOrigin, rayDir)
+    const hit = world.castRay(ray, maxTimeOfImpact, true)
+
+    if (isDebugMode) {
+      const debugRay = new THREE.Line(
+        new THREE.BufferGeometry().setFromPoints([
+          new THREE.Vector3(rayOrigin.x, rayOrigin.y, rayOrigin.z),
+          new THREE.Vector3(rayOrigin.x, rayOrigin.y + maxTimeOfImpact, rayOrigin.z),
+        ]),
+        new THREE.LineBasicMaterial({ color: 0xff0000 }),
+      )
+      scene.add(debugRay)
+      setTimeout(() => {
+        scene.remove(debugRay)
+      }, 1000)
+    }
+    if (hit && hit.timeOfImpact !== undefined) {
+      return rayOrigin.y + rayDir.y * hit.timeOfImpact
+    }
+    return Infinity // or a sensible default
+  }
+
   const inHouse = useBoundStore((state) => state.inHouse)
 
   //logic for camera follow player
@@ -225,10 +260,20 @@ const Camera = ({ player }: CameraProps) => {
       const x = playerPosition.x + radius * Math.sin(yaw) * Math.cos(pitch)
       const z = playerPosition.z + radius * Math.cos(yaw) * Math.cos(pitch)
 
-      // if (y < groundY + 1) y = groundY + 1 // "+ 1" keeps camera slightly above ground
+      // if (y < terrainY + 1) y = terrainY + 1 // "+ 1" keeps camera slightly above terrain
 
-      const terrainY = getHighestYWithRapier(x, z)
-      if (y < terrainY + 0.01) y = terrainY + 0.01
+      const terrainY = getTerrainYWithRapier(playerPosition)
+      const ceilingY = getCeilingYWithRapier(playerPosition)
+      const minY = terrainY + 0.01
+      const maxY = ceilingY - 0.01
+        
+      // console.log({
+      //   ceilingY,
+      //   terrainY,
+      //   y,
+      // })
+      if (y < minY) y = minY
+      if (y > maxY) y = maxY
 
       const sphericalPosition = new THREE.Vector3(x, y, z)
 

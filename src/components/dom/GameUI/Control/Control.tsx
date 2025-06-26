@@ -24,8 +24,9 @@ const Control = () => {
     }, 0)
   }
   return (
-    <div className='w-full h-full '>
-      <div className='controls'>
+      <div className='controls' style={{
+        zIndex: 9999
+      }}>
         <div className='move'>
           <div className='raw'>
             <button
@@ -118,7 +119,6 @@ const Control = () => {
           </div>
         )}
       </div>
-    </div>
   )
 }
 

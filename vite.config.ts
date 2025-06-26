@@ -1,7 +1,7 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import path from 'path'
-
+import glsl from 'vite-plugin-glsl'
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [
@@ -12,6 +12,7 @@ export default defineConfig({
         plugins: [['@babel/plugin-transform-react-jsx', { runtime: 'automatic' }]],
       },
     }),
+    glsl(),
   ],
   resolve: {
     alias: {
@@ -26,7 +27,8 @@ export default defineConfig({
   },
   build: {
     outDir: 'dist',
-    sourcemap: true,
+    emptyOutDir: true,
+    sourcemap: false,
     target: 'esnext',
     rollupOptions: {
       external: ['three', 'three-stdlib'],
