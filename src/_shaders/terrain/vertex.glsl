@@ -1,47 +1,52 @@
-uniform vec3 uColorWaterDeep;
-uniform vec3 uColorWaterSurface;
-uniform vec3 uColorSand;
-uniform vec3 uColorGrass;
-uniform vec3 uColorSnow;
-uniform vec3 uColorRock;
+uniform float uTime;
+uniform float uPositionFrequency;
+uniform float uStrength;
+uniform float uWarpFrequency;
+uniform float uWarpStrength;
+
+varying vec3 vPosition;
+varying float vUpDot;
 
 #include ../includes/simplexNoise2d.glsl
 
-varying vec3 vPosition;
-varying float vUpDot; // dot product with up vector to determine if the surface is facing up
+float getElevation(vec2 position) {
+
+  vec2 warpedPosition = position;
+  warpedPosition += uTime * 0.2;
+  warpedPosition += simplexNoise2d(warpedPosition * uWarpFrequency * uPositionFrequency) * uWarpStrength; // wrap position to create more interesting terrain
+
+  float elevation = 0.0;
+  elevation += simplexNoise2d(warpedPosition * uPositionFrequency) / 2.0;//chia elevation ra de k hon 1.0 de ap dung pow tranh tang qua nhanh
+  elevation += simplexNoise2d(warpedPosition * uPositionFrequency * 2.0) / 4.0;
+  elevation += simplexNoise2d(warpedPosition * uPositionFrequency * 4.0) / 8.0;
+
+  float elevationSign = sign(elevation);// luu lai dau cua elevation (vi sau khi pow tat ca deu duong)
+  elevation = pow(abs(elevation), 2.0) * elevationSign; // co ca am duong (nui, bien)
+  elevation *= uStrength; // scale elevation
+  return elevation;
+}
 
 void main() {
 
-    //Color
-  vec3 color = vec3(1.0); // green color for terrain
+    // Neighbours position 
+  float shift = 0.01;
+  vec3 positionA = position + vec3(shift, 0.0, 0.0);
+  vec3 positionB = position + vec3(0.0, 0.0, -shift);
 
-    // water
-  float surfaceWaterMix = smoothstep(-1.0, -0.1, vPosition.y);
-  color = mix(uColorWaterDeep, uColorWaterSurface, surfaceWaterMix);
+    //elevation
+  float elevation = getElevation(csm_Position.xz);
+  csm_Position.y += elevation;
+  positionA.y += getElevation(positionA.xz);
+  positionB.y += getElevation(positionB.xz);
 
-    // sand
-  float sandMix = step(-0.1, vPosition.y);
-  color = mix(color, uColorSand, sandMix);
+    // Compute normal( procedure_terrain caculating normal)
+  vec3 toA = normalize(positionA - csm_Position);
+  vec3 toB = normalize(positionB - csm_Position);
+  csm_Normal = cross(toA, toB);
 
-    // grass
-  float grassMix = step(-0.06, vPosition.y);
-  color = mix(color, uColorGrass, grassMix);
+    //Varying
+  vPosition = csm_Position;
+  vPosition.xz += uTime * 0.2; // add some movement to the position for animation
 
-    // rock
-    //k muon rock ben noai snow nen dat no o trc snow
-  float rockMix = vUpDot;
-  rockMix = 1.0 - step(0.8, rockMix); // rock only on steep slopes
-  rockMix *= step(-0.06, vPosition.y); // rock only above a certain height
-  color = mix(color, uColorRock, rockMix);
-
-    // snow
-  float snowThreshold = 0.45; // threshold for snow
-  snowThreshold += simplexNoise2d(vPosition.xz * 15.0) * 0.1; // add some noise to the threshold
-
-  float snowMix = step(snowThreshold, vPosition.y);
-  color = mix(color, uColorSnow, snowMix);
-
-    //Final color
-  csm_DiffuseColor = vec4(color, 1.0);
-
+  vUpDot = dot(csm_Normal, vec3(0.0, 1.0, 0.0)); // dot product with up vector to determine if the surface is facing up
 }

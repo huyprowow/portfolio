@@ -1,5 +1,3 @@
-precision mediump float;
-
 uniform vec3 uColorWaterDeep;
 uniform vec3 uColorWaterSurface;
 uniform vec3 uColorSand;
