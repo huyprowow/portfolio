@@ -351,9 +351,30 @@ const Character: React.FC<CharacterProps> = (props) => {
 
   return (
     <group ref={group} {...props} dispose={null} rotation={[0, 0, 0]}>
-      <Camera player={player} />
-      <RigidBody canSleep={false} colliders={false} ref={player} lockRotations={true}>
-        <primitive object={nodes} scale={0.1}></primitive>
+      <Camera
+        player={player}
+        // colliderPosition={[
+        //   characterSetting.startPosition.x,
+        //   characterSetting.startPosition.y ,
+        //   characterSetting.startPosition.z,
+        // ]}
+      />
+      <RigidBody
+        canSleep={false}
+        colliders={false}
+        ref={player}
+        lockRotations={true}
+        position={[
+          characterSetting.startPosition.x,
+          characterSetting.startPosition.y,
+          characterSetting.startPosition.z,
+        ]}
+      >
+        <primitive
+          object={nodes}
+          scale={0.1}
+          position={[0, 0, 0]}
+        ></primitive>
         {/* <mesh geometry={nodes.children[0].geometry} material={nodes.children[0].material} scale={0.1}></mesh> */}
         {/* {helmet && (
           <mesh geometry={nodes.children[1].geometry} material={nodes.children[1].material} scale={0.1}></mesh>
@@ -366,8 +387,8 @@ const Character: React.FC<CharacterProps> = (props) => {
 
         <CapsuleCollider
           args={[playerCollideHalfHeight, characterSetting.collision.radius]}
-          position={[0, playerCollideHalfHeight + characterSetting.collision.radius, 0]}
           mass={50}
+          position={[0, playerCollideHalfHeight + characterSetting.collision.radius, 0]}
           friction={1}
           restitution={0}
           linearDamping={1}

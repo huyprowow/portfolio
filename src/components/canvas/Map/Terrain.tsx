@@ -9,6 +9,9 @@ import terrainFragment from '@/_shaders/terrain/fragment.glsl'
 import { useControls } from 'leva'
 import { createNoise2D } from 'simplex-noise'
 import { simplexNoise2d } from '@/helpers/noiseFunction'
+import CustomShaderMaterialVanilla from 'three-custom-shader-material/vanilla'
+import dfMapSetting from '@/settings/df_map_setting.json'
+import Grass from './Grass'
 
 const levaConfig = {
   uPositionFrequency: { value: 0.2, min: 0, max: 1, step: 0.001 },
@@ -19,13 +22,13 @@ const levaConfig = {
   colorWaterSurface: { value: '#66a8ff' },
   colorSand: { value: '#ffe894' },
   colorGrass: { value: '#85d534' },
-  colorSnow: { value: '#ffffff' },
+  colorTopMountain: { value: '#ffffff' },
   colorRock: { value: '#bfbd8d' },
 }
 
-const scaleMap = 100
+const scaleMap = dfMapSetting.scaleTerrain
 
-const getElevation = (position, uniforms, time = 0) => {
+const getElevation = (position: [number, number], uniforms: any, time = 0) => {
   let warpedPosition = [position[0], position[1]]
 
   // Add time animation (matching your vertex shader)
@@ -78,6 +81,38 @@ const getElevation = (position, uniforms, time = 0) => {
 }
 
 const Terrain = () => {
+  const stoneRiverARMTexture = useLoader(THREE.TextureLoader, Assets.TEXTURE.STONE_RIVER.ALBEDO_ROUGHNESS_METALNESS)
+  const stoneRiverDiffuseTexture = useLoader(THREE.TextureLoader, Assets.TEXTURE.STONE_RIVER.DIFFUSE)
+  const stoneRiverDisplacementTexture = useLoader(THREE.TextureLoader, Assets.TEXTURE.STONE_RIVER.HEIGHT)
+  const stoneRiverNORMALTexture = useLoader(THREE.TextureLoader, Assets.TEXTURE.STONE_RIVER.NORMAL)
+
+  const rockMossyARMTexture = useLoader(THREE.TextureLoader, Assets.TEXTURE.ROCK_MOSSY.ALBEDO_ROUGHNESS_METALNESS)
+  const rockMossyDiffuseTexture = useLoader(THREE.TextureLoader, Assets.TEXTURE.ROCK_MOSSY.DIFFUSE)
+  const rockMossyDisplacementTexture = useLoader(THREE.TextureLoader, Assets.TEXTURE.ROCK_MOSSY.HEIGHT)
+  const rockMossyNORMALTexture = useLoader(THREE.TextureLoader, Assets.TEXTURE.ROCK_MOSSY.NORMAL)
+
+  const alluvialSoilARMTexture = useLoader(THREE.TextureLoader, Assets.TEXTURE.ALLUVIAL_SOIL.ALBEDO_ROUGHNESS_METALNESS)
+  const alluvialSoilDiffuseTexture = useLoader(THREE.TextureLoader, Assets.TEXTURE.ALLUVIAL_SOIL.DIFFUSE)
+  const alluvialSoilDisplacementTexture = useLoader(THREE.TextureLoader, Assets.TEXTURE.ALLUVIAL_SOIL.HEIGHT)
+  const alluvialSoilNORMALTexture = useLoader(THREE.TextureLoader, Assets.TEXTURE.ALLUVIAL_SOIL.NORMAL)
+
+  const pebbleGroundARMTexture = useLoader(THREE.TextureLoader, Assets.TEXTURE.GROUND.ALBEDO_ROUGHNESS_METALNESS)
+  const pebbleGroundDiffuseTexture = useLoader(THREE.TextureLoader, Assets.TEXTURE.GROUND.DIFFUSE)
+  const pebbleGroundDisplacementTexture = useLoader(THREE.TextureLoader, Assets.TEXTURE.GROUND.HEIGHT)
+  const pebbleGroundNORMALTexture = useLoader(THREE.TextureLoader, Assets.TEXTURE.GROUND.NORMAL)
+
+  const rockWallAlbedoTexture = useLoader(THREE.TextureLoader, Assets.TEXTURE.ROCK_WALL.ALBEDO)
+  const rockWallRoughnessTexture = useLoader(THREE.TextureLoader, Assets.TEXTURE.ROCK_WALL.ROUGHNESS)
+  const rockWallMetalnessTexture = useLoader(THREE.TextureLoader, Assets.TEXTURE.ROCK_WALL.METALNESS)
+  const rockWallDiffuseTexture = useLoader(THREE.TextureLoader, Assets.TEXTURE.ROCK_WALL.DIFFUSE)
+  const rockWallDisplacementTexture = useLoader(THREE.TextureLoader, Assets.TEXTURE.ROCK_WALL.HEIGHT)
+  const rockWallNORMALTexture = useLoader(THREE.TextureLoader, Assets.TEXTURE.ROCK_WALL.NORMAL)
+
+  const topMountainARMTexture = useLoader(THREE.TextureLoader, Assets.TEXTURE.TOP_MOUNTAIN.ALBEDO_ROUGHNESS_METALNESS)
+  const topMountainDiffuseTexture = useLoader(THREE.TextureLoader, Assets.TEXTURE.TOP_MOUNTAIN.DIFFUSE)
+  const topMountainDisplacementTexture = useLoader(THREE.TextureLoader, Assets.TEXTURE.TOP_MOUNTAIN.HEIGHT)
+  const topMountainNORMALTexture = useLoader(THREE.TextureLoader, Assets.TEXTURE.TOP_MOUNTAIN.NORMAL)
+
   // Leva controls for all uniforms and colors
   const {
     uPositionFrequency,
@@ -88,7 +123,7 @@ const Terrain = () => {
     colorWaterSurface,
     colorSand,
     colorGrass,
-    colorSnow,
+    colorTopMountain,
     colorRock,
   } = useControls('Terrain', levaConfig)
 
@@ -103,8 +138,42 @@ const Terrain = () => {
     uColorWaterSurface: new THREE.Uniform(new THREE.Color(colorWaterSurface)),
     uColorSand: new THREE.Uniform(new THREE.Color(colorSand)),
     uColorGrass: new THREE.Uniform(new THREE.Color(colorGrass)),
-    uColorSnow: new THREE.Uniform(new THREE.Color(colorSnow)),
+    uColorTopMountain: new THREE.Uniform(new THREE.Color(colorTopMountain)),
     uColorRock: new THREE.Uniform(new THREE.Color(colorRock)),
+
+    // Textures
+
+    uStoneRiverARMTexture: new THREE.Uniform(stoneRiverARMTexture),
+    uStoneRiverDiffuseTexture: new THREE.Uniform(stoneRiverDiffuseTexture),
+    uStoneRiverDisplacementTexture: new THREE.Uniform(stoneRiverDisplacementTexture),
+    uStoneRiverNORMALTexture: new THREE.Uniform(stoneRiverNORMALTexture),
+
+    uRockMossyARMTexture: new THREE.Uniform(rockMossyARMTexture),
+    uRockMossyDiffuseTexture: new THREE.Uniform(rockMossyDiffuseTexture),
+    uRockMossyDisplacementTexture: new THREE.Uniform(rockMossyDisplacementTexture),
+    uRockMossyNORMALTexture: new THREE.Uniform(rockMossyNORMALTexture),
+
+    uAlluvialSoilARMTexture: new THREE.Uniform(alluvialSoilARMTexture),
+    uAlluvialSoilDiffuseTexture: new THREE.Uniform(alluvialSoilDiffuseTexture),
+    uAlluvialSoilDisplacementTexture: new THREE.Uniform(alluvialSoilDisplacementTexture),
+    uAlluvialSoilNORMALTexture: new THREE.Uniform(alluvialSoilNORMALTexture),
+
+    uPebbleGroundARMTexture: new THREE.Uniform(pebbleGroundARMTexture),
+    uPebbleGroundDiffuseTexture: new THREE.Uniform(pebbleGroundDiffuseTexture),
+    uPebbleGroundDisplacementTexture: new THREE.Uniform(pebbleGroundDisplacementTexture),
+    uPebbleGroundNORMALTexture: new THREE.Uniform(pebbleGroundNORMALTexture),
+
+    uRockWallAlbedoTexture: new THREE.Uniform(rockWallAlbedoTexture),
+    uRockWallRoughnessTexture: new THREE.Uniform(rockWallRoughnessTexture),
+    uRockWallMetalnessTexture: new THREE.Uniform(rockWallMetalnessTexture),
+    uRockWallDiffuseTexture: new THREE.Uniform(rockWallDiffuseTexture),
+    uRockWallDisplacementTexture: new THREE.Uniform(rockWallDisplacementTexture),
+    uRockWallNORMALTexture: new THREE.Uniform(rockWallNORMALTexture),
+
+    uTopMountainARMTexture: new THREE.Uniform(topMountainARMTexture),
+    uTopMountainDiffuseTexture: new THREE.Uniform(topMountainDiffuseTexture),
+    uTopMountainDisplacementTexture: new THREE.Uniform(topMountainDisplacementTexture),
+    uTopMountainNORMALTexture: new THREE.Uniform(topMountainNORMALTexture),
   })
 
   // Update uniforms when Leva values change
@@ -117,7 +186,7 @@ const Terrain = () => {
     uniforms.current.uColorWaterSurface.value.set(colorWaterSurface)
     uniforms.current.uColorSand.value.set(colorSand)
     uniforms.current.uColorGrass.value.set(colorGrass)
-    uniforms.current.uColorSnow.value.set(colorSnow)
+    uniforms.current.uColorTopMountain.value.set(colorTopMountain)
     uniforms.current.uColorRock.value.set(colorRock)
   }, [
     uPositionFrequency,
@@ -128,7 +197,7 @@ const Terrain = () => {
     colorWaterSurface,
     colorSand,
     colorGrass,
-    colorSnow,
+    colorTopMountain,
     colorRock,
   ])
   const geometry = useMemo(() => {
@@ -164,15 +233,49 @@ const Terrain = () => {
   useFrame((state) => {
     // uniforms.current.uTime.value = state.clock.getElapsedTime()
   })
+  const customDepthMaterial = useMemo(() => {
+    const dm = new CustomShaderMaterialVanilla<typeof THREE.MeshDepthMaterial>({
+      //CSM
+      vertexShader: terrainVertex,
+      baseMaterial: THREE.MeshDepthMaterial,
+      uniforms: uniforms.current,
+
+      //MeshDepthMaterial
+      depthPacking: THREE.RGBADepthPacking,
+    })
+    return dm
+  }, [uniforms.current, terrainVertex])
 
   return (
     <>
-      <mesh geometry={geometry} position={[0, -0.1, 0]} receiveShadow scale={[scaleMap, scaleMap, scaleMap]}>
+      <Grass
+        getElevation={getElevation}
+        terrainUniforms={{
+          uPositionFrequency,
+          uStrength,
+          uWarpFrequency,
+          uWarpStrength,
+        }}
+        scaleMap={scaleMap}
+      />
+      <mesh
+        geometry={geometry}
+        position={[
+          dfMapSetting.object.terrain.startPosition.x,
+          dfMapSetting.object.terrain.startPosition.y - 0.1,
+          dfMapSetting.object.terrain.startPosition.z,
+        ]}
+        receiveShadow
+        scale={[scaleMap, scaleMap, scaleMap]}
+        customDepthMaterial={customDepthMaterial}
+      >
         <CustomShaderMaterial<typeof THREE.MeshStandardMaterial>
+          //CSM
           vertexShader={terrainVertex}
           fragmentShader={terrainFragment}
           baseMaterial={THREE.MeshStandardMaterial}
           uniforms={uniforms.current}
+          //MeshStandardMaterial
           metalness={0}
           roughness={0.5}
           color={'#85d534'}
@@ -187,7 +290,11 @@ const Terrain = () => {
             heightfieldData.heights, // number[]
             { x: 10 * scaleMap, y: 1 * scaleMap, z: 10 * scaleMap }, // scale object
           ]}
-          position={[0, 0, 0]}
+          position={[
+            dfMapSetting.object.terrain.startPosition.x,
+            dfMapSetting.object.terrain.startPosition.y,
+            dfMapSetting.object.terrain.startPosition.z,
+          ]}
           restitution={0.2}
           friction={0}
         />

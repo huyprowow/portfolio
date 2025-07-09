@@ -18,9 +18,10 @@
     "noFallthroughCasesInSwitch": true,
     "baseUrl": ".",
     "paths": {
-      "@/*": ["src/*"]
+      "@/*": ["src/*"],
+      "@framework/*": ["src/lib/CubismSdkForWeb-5-r.4/Framework/src/*"]
     }
   },
-  "include": ["src"],
+  "include": ["src", "src/lib/CubismSdkForWeb-5-r.4"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }

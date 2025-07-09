@@ -9,17 +9,13 @@ import { KeyboardControls, KeyboardControlsEntry } from '@react-three/drei'
 import { useEffect, useMemo } from 'react'
 import { Perf } from 'r3f-perf'
 import { DebugUI } from '../components/canvas/Debug/DebugUI'
-import Camera from '../components/canvas/Character/Camera/Camera'
-import Room from '../components/canvas/Map/Room'
-import Terrain from '../components/canvas/Map/Terrain'
 import { useControls } from 'leva'
 import Character from '@/components/canvas/Character/Character'
 import UI from '@/components/dom/UI'
-import Campfire from '@/components/canvas/Map/Campfire'
-import { Tent } from '@/components/canvas/Map/Tent'
-import WoodBlock from '@/components/canvas/Map/WoodBlock'
-import { useThree } from '@react-three/fiber'
-
+import Map from '@/components/canvas/Map/Map'
+import dfGameSetting from '@/settings/df_game_setting.json'
+import useAudio from '@/hooks/useAudio'
+import Tutorial from '@/components/dom/Tutorial'
 const startDebug = () => {
   const hash = window.location.hash
   if (!hash) {
@@ -55,24 +51,29 @@ export default function Home() {
     ],
     [],
   )
+  const { bgm } = useAudio()
+  useEffect(() => {
+    if (dfGameSetting.audio.mute) return
+    const bgmName = dfGameSetting.audio.bgm.default.name
+    const currentBgm = bgm.filter((item) => item.key === bgmName)[0]
+    currentBgm.value.currentTime = 0
+    currentBgm.value.loop = true
+    currentBgm.value.volume = dfGameSetting.audio.bgm.default.volume
+    currentBgm.value.play()
+  }, [bgm])
 
   return (
     <>
       <DebugUI />
       <KeyboardControls map={map}>
+        <Tutorial/>
         <UI />
         <SceneView className='relative h-full sm:w-full' orbit={orbit}>
           <SceneCommon color='#000000' />
           <Sky />
-          {/* <Camera /> */}
           <Physics debug={isDebugMode} gravity={[0, -9.8, 0]} timeStep='vary' paused={!visible || loading}>
-            <Terrain />
-            <Campfire />
-            <Tent />
-            <WoodBlock />
-            {/* <Room /> */}
+            <Map />
             <Character orbit={orbit} />
-
             {isDebugMode && (
               <>
                 <Perf position='top-left' />

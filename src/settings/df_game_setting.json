@@ -4,8 +4,15 @@
       "TERRAIN": "0b0001",
       "PLAYER": "0b0010",
       "TENT": "0b0100"
-
     }
-   
+  },
+  "audio": {
+    "mute": true,
+    "bgm": {
+      "default": {
+        "volume": 0.05,
+        "name": "BGM_0"
+      }
+    }
   }
 }

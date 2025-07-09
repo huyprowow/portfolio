@@ -1,3 +1,5 @@
+import { Snowflake } from 'lucide-react'
+
 export const Assets = {
   CHARACTER: 'assets/Pro_Sword_and_Shield_Pack/Paladin_WProp_J_Nordstrom.fbx',
   // CHARACTER: 'assets/IA_schoolgirl/IA.pmx',
@@ -65,4 +67,60 @@ export const Assets = {
   CASTLE_WALL: 'assets/Map/castle_wall.glb',
   TENT: 'assets/Map/tent_modified.glb',
   WOOD_BLOCK: 'assets/Map/wood_chopping_trunk_base.glb',
+
+  TEXTURE: {
+    STONE_RIVER: {
+      ALBEDO_ROUGHNESS_METALNESS: 'assets/textures/ganges_river_pebbles_1k/ganges_river_pebbles_arm_1k.jpg',
+      DIFFUSE: 'assets/textures/ganges_river_pebbles_1k/ganges_river_pebbles_diff_1k.jpg',
+      HEIGHT: 'assets/textures/ganges_river_pebbles_1k/ganges_river_pebbles_disp_1k.jpg',
+      NORMAL: 'assets/textures/ganges_river_pebbles_1k/ganges_river_pebbles_nor_gl_1k.jpg',
+    },
+    ROCK_MOSSY: {
+      ALBEDO_ROUGHNESS_METALNESS: 'assets/textures/mossy_rock_1k/mossy_rock_arm_1k.jpg',
+      DIFFUSE: 'assets/textures/mossy_rock_1k/mossy_rock_diff_1k.jpg',
+      HEIGHT: 'assets/textures/mossy_rock_1k/mossy_rock_disp_1k.jpg',
+      NORMAL: 'assets/textures/mossy_rock_1k/mossy_rock_nor_gl_1k.jpg',
+    },
+    ALLUVIAL_SOIL: {
+      ALBEDO_ROUGHNESS_METALNESS: 'assets/textures/red_laterite_soil_stones_1k/red_laterite_soil_stones_arm_1k.jpg',
+      DIFFUSE: 'assets/textures/red_laterite_soil_stones_1k/red_laterite_soil_stones_diff_1k.jpg',
+      HEIGHT: 'assets/textures/red_laterite_soil_stones_1k/red_laterite_soil_stones_disp_1k.jpg',
+      NORMAL: 'assets/textures/red_laterite_soil_stones_1k/red_laterite_soil_stones_nor_gl_1k.jpg',
+    },
+    GROUND: {
+      ALBEDO_ROUGHNESS_METALNESS: 'assets/textures/brown_mud_leaves_01_1k/brown_mud_leaves_01_arm_1k.jpg',
+      DIFFUSE: 'assets/textures/brown_mud_leaves_01_1k/brown_mud_leaves_01_diff_1k.jpg',
+      HEIGHT: 'assets/textures/brown_mud_leaves_01_1k/brown_mud_leaves_01_disp_1k.jpg',
+      NORMAL: 'assets/textures/brown_mud_leaves_01_1k/brown_mud_leaves_01_nor_gl_1k.jpg',
+    },
+    ROCK_WALL: {
+      ALBEDO: 'assets/textures/GreyRock03_1K/GreyRock03_1K_AO.png',
+      ROUGHNESS: 'assets/textures/GreyRock03_1K/GreyRock03_1K_Roughness.png',
+      METALNESS: 'assets/textures/GreyRock03_1K/GreyRock03_1K_Metallic.png',
+      DIFFUSE: 'assets/textures/GreyRock03_1K/GreyRock03_1K_BaseColor.png',
+      HEIGHT: 'assets/textures/GreyRock03_1K/GreyRock03_1K_Height.png',
+      NORMAL: 'assets/textures/GreyRock03_1K/GreyRock03_1K_Normal.png',
+    },
+    TOP_MOUNTAIN: {
+      ALBEDO_ROUGHNESS_METALNESS: 'assets/textures/snow_02_1k/snow_02_arm_1k.jpg',
+      DIFFUSE: 'assets/textures/snow_02_1k/snow_02_diff_1k.jpg',
+      HEIGHT: 'assets/textures/snow_02_1k/snow_02_disp_1k.jpg',
+      NORMAL: 'assets/textures/snow_02_1k/snow_02_nor_gl_1k.jpg',
+    },
+    GRASS: {
+      ALBEDO: 'assets/textures/grass.jpg'
+    }
+  },
+  AUDIO: {
+    BGM: {
+      BGM_0: 'assets/audio/bgm/ethereal-ambient-269037.mp3',
+      BGM_1: 'assets/audio/bgm/fantasy-158150.mp3',
+      BGM_2: 'assets/audio/bgm/fantasy-354183.mp3',
+      BGM_3: 'assets/audio/bgm/fantasy-classical-themes-132199.mp3',
+      BGM_4: 'assets/audio/bgm/fantasy-forest-1-263881.mp3',
+      BGM_5: 'assets/audio/bgm/fantasy-music-overture-orchestral-amp-choir-113620.mp3',
+      BGM_6: 'assets/audio/bgm/game-setting-fantasy-142092.mp3',
+    },
+    SFX: {},
+  },
 }

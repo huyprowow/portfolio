@@ -1,3 +1,49 @@
 {
-  "maxTerrainHeight": 20
+  "maxTerrainHeight": 20,
+  "object": {
+    "tent": {
+      "startPosition": {
+        "x": 200,
+        "y": 5,
+        "z": 20
+      },
+      "boxTriggerZone": {
+        "size": [50, 40, 60],
+        "center": [200, 22.5, 20]
+      }
+    },
+    "campfire": {
+      "startPosition": {
+        "x": 140,
+        "y": 0,
+        "z": 40
+      }
+    },
+    "woodBlock": {
+      "startPosition": {
+        "x": 150,
+        "y": -28,
+        "z": 20
+      }
+    },
+    "terrain": {
+      "startPosition": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      }
+    },
+    "water": {
+      "startPosition": {
+        "x": 0,
+        "y": -6.1,
+        "z": 0
+      }
+    },
+    "grass": {
+    }
+  },
+
+  "scaleTerrain":100,
+  "scaleSea": 100
 }

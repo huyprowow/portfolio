@@ -37,7 +37,7 @@ export function SceneCommon({ color = '#000000' }: CommonProps) {
       <ambientLight intensity={2} />
       <pointLight position={[20, 30, 10]} intensity={3} decay={0.2} />
       <pointLight position={[-10, -10, -10]} color='blue' intensity={3} decay={0.2} />
-      <AccumulativeShadows temporal frames={100} scale={10}>
+      <AccumulativeShadows temporal frames={100} scale={100}>
         <RandomizedLight amount={8} position={[5, 5, -10]} />
       </AccumulativeShadows>
     </Suspense>

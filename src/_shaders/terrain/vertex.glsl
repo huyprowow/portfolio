@@ -6,6 +6,8 @@ uniform float uWarpStrength;
 
 varying vec3 vPosition;
 varying float vUpDot;
+varying vec2 vUv;
+
 
 #include ../includes/simplexNoise2d.glsl
 
@@ -49,4 +51,6 @@ void main() {
   vPosition.xz += uTime * 0.2; // add some movement to the position for animation
 
   vUpDot = dot(csm_Normal, vec3(0.0, 1.0, 0.0)); // dot product with up vector to determine if the surface is facing up
+  vUv = uv;
+
 }

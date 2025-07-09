@@ -3,3 +3,4 @@ public/assets/Map/st._annes_episcopal_school.glb filter=lfs diff=lfs merge=lfs -
 portfolio/public/assets/Map/st._annes_episcopal_school.glb filter=lfs diff=lfs merge=lfs -text
 public/assets/Map/st._annes_episcopal_school.glb filter=lfs diff=lfs merge=lfs -text
 public/assets/Map/campfire.glb filter=lfs diff=lfs merge=lfs -text
+chromium/* filter=lfs diff=lfs merge=lfs -text 

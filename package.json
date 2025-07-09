@@ -35,6 +35,7 @@
     "react-router-dom": "^7.6.0",
     "sass": "^1.89.0",
     "simplex-noise": "^4.0.3",
+    "spectorjs": "^0.9.30",
     "tailwind-merge": "^3.3.1",
     "tailwindcss-animate": "^1.0.7",
     "three": "^0.172.0",

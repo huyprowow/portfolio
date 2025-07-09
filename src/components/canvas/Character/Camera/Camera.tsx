@@ -20,8 +20,22 @@ interface CameraProps {
 }
 
 const Camera = ({ player }: CameraProps) => {
-  const [smoothCameraPosition] = useState(() => new THREE.Vector3(0, 0, 0))
-  const [smoothCameraTarget] = useState(() => new THREE.Vector3(0, 0, 0))
+  const [smoothCameraPosition] = useState(
+    () =>
+      new THREE.Vector3(
+        characterSetting.startPosition.x,
+        characterSetting.startPosition.y + 100,
+        characterSetting.startPosition.z - 20,
+      ),
+  )
+  const [smoothCameraTarget] = useState(
+    () =>
+      new THREE.Vector3(
+        characterSetting.startPosition.x,
+        characterSetting.startPosition.y + 100,
+        characterSetting.startPosition.z - 20,
+      ),
+  )
   const tmpCameraPosition = useRef(new THREE.Vector3())
   const tmpCameraTarget = useRef(new THREE.Vector3())
   const height = cameraSetting.height.default
@@ -266,7 +280,7 @@ const Camera = ({ player }: CameraProps) => {
       const ceilingY = getCeilingYWithRapier(playerPosition)
       const minY = terrainY + 0.01
       const maxY = ceilingY - 0.01
-        
+
       // console.log({
       //   ceilingY,
       //   terrainY,
