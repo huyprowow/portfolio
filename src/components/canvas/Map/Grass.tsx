@@ -5,9 +5,11 @@ import grassFragmentShader from '@/_shaders/grass/fragment.glsl'
 import { Assets } from '@/helpers/assetMap'
 import { useLoader } from '@react-three/fiber'
 import dfMapSetting from '@/settings/df_map_setting.json'
-
+import { Instance, Instances } from '@react-three/drei'
+import CustomShaderMaterialVanilla from 'three-custom-shader-material/vanilla'
 const PLANE_SIZE = 10
-const BLADE_COUNT = 1000000
+const BLADE_COUNT = 1000 //000
+const INSTANCES_LIMIT = 10000
 
 interface GrassProps {
   getElevation: (position: [number, number], uniforms: any, time: number) => number
@@ -18,40 +20,35 @@ interface GrassProps {
 const timeUniform = { type: 'f', value: 0.0 }
 const Grass = ({ getElevation, terrainUniforms, scaleMap }: GrassProps) => {
   const grassRef = useRef<THREE.InstancedMesh>(null)
-  let BLADE_WIDTH = 0.1 / (scaleMap * 0.4)
-  let BLADE_HEIGHT = 0.8 / (scaleMap * 0.2)
-  let BLADE_HEIGHT_VARIATION = 0.6 / (scaleMap * 0.1)
+  let BLADE_WIDTH = 0.1
+  let BLADE_HEIGHT = 2.8
+  let BLADE_HEIGHT_VARIATION = 0.6
 
-  // useEffect(() => {
-  //   for (let i = 0; i < BLADE_COUNT; i++) {
-  //     const matrix = new THREE.Matrix4()
-  //     matrix.compose(new THREE.Vector3(i * 2, 0, 0), new THREE.Quaternion(), new THREE.Vector3(1, 1, 1))
-  //     grassRef.current?.setMatrixAt(i, matrix)
-  //   }
-  // }, [])
+  useEffect(() => {
+    const mapSize = PLANE_SIZE * scaleMap
+    const instancesPerRow = Math.sqrt(INSTANCES_LIMIT)
 
-  const grassTexture = useLoader(THREE.TextureLoader, Assets.TEXTURE.GRASS.ALBEDO)
-  const grassUniforms = {
-    textures: { value: [grassTexture] },
-    iTime: timeUniform,
-  }
+    for (let i = 0; i < INSTANCES_LIMIT; i++) {
+      const matrix = new THREE.Matrix4()
+      const row = Math.floor(i / instancesPerRow)
+      const col = i % instancesPerRow
 
-  const grassMaterial = React.useMemo(
-    () =>
-      new THREE.ShaderMaterial({
-        uniforms: grassUniforms,
-        vertexShader: grassVertexShader,
-        fragmentShader: grassFragmentShader,
-        vertexColors: true,
-        side: THREE.DoubleSide,
-      }),
-    [grassTexture],
-  )
+      const x = (col - instancesPerRow / 2) * (mapSize / instancesPerRow)
+      const z = (row - instancesPerRow / 2) * (mapSize / instancesPerRow)
+
+      const position = new THREE.Vector3(x, 0, z)
+      const scale = new THREE.Vector3(1, 1, 1)
+
+      matrix.compose(position, new THREE.Quaternion(), scale)
+      grassRef.current?.setMatrixAt(i, matrix)
+    }
+  }, [INSTANCES_LIMIT, scaleMap])
+
   const convertRange = (val: number, oldMin: number, oldMax: number, newMin: number, newMax: number) => {
     return ((val - oldMin) * (newMax - newMin)) / (oldMax - oldMin) + newMin
   }
 
-  const generateBlade = (center: THREE.Vector3, vArrOffset: number, uv: THREE.Vector2) => {
+  const generateBlade = (center: THREE.Vector3, vArrOffset: number, uv: number[]) => {
     const MID_WIDTH = BLADE_WIDTH * 0.5
     const TIP_OFFSET = 0.1
     const height = BLADE_HEIGHT + Math.random() * BLADE_HEIGHT_VARIATION
@@ -125,12 +122,11 @@ const Grass = ({ getElevation, terrainUniforms, scaleMap }: GrassProps) => {
       const VERTEX_COUNT = 5
       const surfaceMin = (PLANE_SIZE / 2) * -1
       const surfaceMax = PLANE_SIZE / 2
-      const radius = PLANE_SIZE / 2
 
       const x = Math.random() * PLANE_SIZE - PLANE_SIZE / 2
       const z = Math.random() * PLANE_SIZE - PLANE_SIZE / 2
-      const elevation = getElevation([x, z], terrainUniforms, 0) // or pass time if animated
-      const pos = new THREE.Vector3(x, elevation, z)
+      // const elevation = getElevation([x, z], terrainUniforms, 0) // or pass time if animated
+      const pos = new THREE.Vector3(x, 0, z)
 
       const uv = [convertRange(pos.x, surfaceMin, surfaceMax, 0, 1), convertRange(pos.z, surfaceMin, surfaceMax, 0, 1)]
 
@@ -145,12 +141,8 @@ const Grass = ({ getElevation, terrainUniforms, scaleMap }: GrassProps) => {
     return { positions, uvs, indices, colors }
   }
 
-  const { positions, uvs, indices, colors } = useMemo(
-    () => generateGrassData(),
-    [getElevation, terrainUniforms, scaleMap],
-  )
-
   const geom = useMemo(() => {
+    const { positions, uvs, indices, colors } = generateGrassData()
     const g = new THREE.BufferGeometry()
     g.setAttribute('position', new THREE.BufferAttribute(new Float32Array(positions), 3))
     g.setAttribute('uv', new THREE.BufferAttribute(new Float32Array(uvs), 2))
@@ -158,33 +150,73 @@ const Grass = ({ getElevation, terrainUniforms, scaleMap }: GrassProps) => {
     g.setIndex(indices)
     g.computeVertexNormals()
 
-    // geom.computeFaceNormals()
+    // g.computeFaceNormals()
     return g
-  }, [positions, uvs, indices, colors])
+  }, [])
+
+  const grassTexture = useLoader(THREE.TextureLoader, Assets.TEXTURE.GRASS.ALBEDO)
+  const grassUniforms = useRef({
+    // textures: new THREE.Uniform([new THREE.Uniform(grassTexture), new THREE.Uniform(grassTexture)]),
+    // texture1: new THREE.Uniform(grassTexture),
+    textures: { value: [grassTexture, grassTexture] },
+    texture1: { value: grassTexture },
+    iTime: new THREE.Uniform(timeUniform),
+  })
+
+  const grassMaterial = useMemo(() => {
+    console.log('grassUniforms.current', grassUniforms.current)
+    const gm = new CustomShaderMaterialVanilla({
+      //CSM
+      vertexShader: grassVertexShader,
+      fragmentShader: grassFragmentShader,
+      uniforms: grassUniforms.current,
+      baseMaterial: THREE.MeshStandardMaterial,
+
+      //MeshStandardMaterial
+      // metalness={0}
+      // roughness={0.5}
+      // color={'#85d534'}
+      vertexColors: true,
+      side: THREE.DoubleSide,
+    })
+    return gm
+  }, [])
 
   return (
-    // <instancedMesh
-    //   ref={grassRef}
-    //   args={[geom, grassMaterial, BLADE_COUNT]}
-    //   castShadow
-    //   receiveShadow
+    <>
+      {/* <instancedMesh ref={grassRef} args={[null, null, INSTANCES_LIMIT]} castShadow receiveShadow>
+        <boxGeometry />
+        <meshStandardMaterial color='tomato' />
+      </instancedMesh> */}
+      <instancedMesh
+        ref={grassRef}
+        args={[geom, grassMaterial, INSTANCES_LIMIT]}
+        castShadow
+        receiveShadow
+        //   // position={[
+        //   //   dfMapSetting.object.terrain.startPosition.x,
+        //   //   dfMapSetting.object.terrain.startPosition.y - 0.1,
+        //   //   dfMapSetting.object.terrain.startPosition.z,
+        //   // ]}
+      />
+    </>
+    // <Instances ref={grassRef} limit={INSTANCES_LIMIT} geometry={geom} material={grassMaterial}>
+    //   <Instance
+    //     key={`instanced-${INSTANCES_LIMIT}`}
+    //     // position={[Math.random() * scaleMap, 0, Math.random() * scaleMap]}
+    //     //
+    //   />
+    // </Instances>
+    // <mesh
+    //   material={grassMaterial}
+    //   geometry={geom}
+    //   scale={[scaleMap, scaleMap, scaleMap]}
     //   position={[
     //     dfMapSetting.object.terrain.startPosition.x,
     //     dfMapSetting.object.terrain.startPosition.y - 0.1,
     //     dfMapSetting.object.terrain.startPosition.z,
     //   ]}
-    //   scale={[scaleMap, scaleMap, scaleMap]}
-    // />
-    <mesh
-      material={grassMaterial}
-      geometry={geom}
-      scale={[scaleMap, scaleMap, scaleMap]}
-      position={[
-        dfMapSetting.object.terrain.startPosition.x,
-        dfMapSetting.object.terrain.startPosition.y - 0.1,
-        dfMapSetting.object.terrain.startPosition.z,
-      ]}
-    ></mesh>
+    // ></mesh>
   )
 }
 

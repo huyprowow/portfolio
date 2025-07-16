@@ -28,7 +28,15 @@ export const Tent = () => {
   return (
     <>
       <RigidBody type='fixed' colliders='trimesh'>
-        <group dispose={null} position={[dfMapSetting.object.tent.startPosition.x, dfMapSetting.object.tent.startPosition.y, dfMapSetting.object.tent.startPosition.z]} rotation={[0, -Math.PI / 2, 0]}>
+        <group
+          dispose={null}
+          position={[
+            dfMapSetting.object.tent.startPosition.x,
+            dfMapSetting.object.tent.startPosition.y,
+            dfMapSetting.object.tent.startPosition.z,
+          ]}
+          rotation={[0, -Math.PI / 2, 0]}
+        >
           <group scale={0.18}>
             <group>
               <mesh castShadow receiveShadow geometry={nodes['01_01_0'].geometry} material={materials.material} />
@@ -39,8 +47,16 @@ export const Tent = () => {
         </group>
       </RigidBody>
       <BoxTriggerZone
-        size={[dfMapSetting.object.tent.boxTriggerZone.size[0], dfMapSetting.object.tent.boxTriggerZone.size[1], dfMapSetting.object.tent.boxTriggerZone.size[2]]}
-        center={[dfMapSetting.object.tent.boxTriggerZone.center[0], dfMapSetting.object.tent.boxTriggerZone.center[1], dfMapSetting.object.tent.boxTriggerZone.center[2]]}
+        size={[
+          dfMapSetting.object.tent.boxTriggerZone.size[0],
+          dfMapSetting.object.tent.boxTriggerZone.size[1],
+          dfMapSetting.object.tent.boxTriggerZone.size[2],
+        ]}
+        center={[
+          dfMapSetting.object.tent.boxTriggerZone.center[0],
+          dfMapSetting.object.tent.boxTriggerZone.center[1],
+          dfMapSetting.object.tent.boxTriggerZone.center[2],
+        ]}
         playerRef={playerRef}
         onEnter={onEnter}
         onExit={onExit}
@@ -50,4 +66,4 @@ export const Tent = () => {
   )
 }
 
-useGLTF.preload(Assets.TENT)
+useLoader.preload(GLTFLoader, Assets.TENT)
