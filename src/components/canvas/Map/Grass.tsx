@@ -35,12 +35,20 @@ const Grass = ({ getElevation, terrainUniforms, scaleMap }: GrassProps) => {
 
       const x = (col - instancesPerRow / 2) * (mapSize / instancesPerRow)
       const z = (row - instancesPerRow / 2) * (mapSize / instancesPerRow)
+      // Scale the coordinates back to the base terrain size for elevation calculation
+      const scaledX = x / scaleMap
+      const scaledZ = z / scaleMap
+      const elevation = getElevation([scaledX, scaledZ], terrainUniforms, 0)
 
-      const position = new THREE.Vector3(x, 0, z)
-      const scale = new THREE.Vector3(1, 1, 1)
+      // Scale the elevation back to match the terrain scale
+      const scaledElevation = elevation * scaleMap
+      if (scaledElevation >= -0.5) {
+        const position = new THREE.Vector3(x, scaledElevation, z)
+        const scale = new THREE.Vector3(1, 1, 1)
 
-      matrix.compose(position, new THREE.Quaternion(), scale)
-      grassRef.current?.setMatrixAt(i, matrix)
+        matrix.compose(position, new THREE.Quaternion(), scale)
+        grassRef.current?.setMatrixAt(i, matrix)
+      }
     }
   }, [INSTANCES_LIMIT, scaleMap])
 
@@ -96,7 +104,6 @@ const Grass = ({ getElevation, terrainUniforms, scaleMap }: GrassProps) => {
       { pos: tl.toArray(), uv: uv, color: gray },
       { pos: tc.toArray(), uv: uv, color: white },
     ]
-
     const indices = [
       vArrOffset,
       vArrOffset + 1,
@@ -112,6 +119,80 @@ const Grass = ({ getElevation, terrainUniforms, scaleMap }: GrassProps) => {
     return { verts, indices }
   }
 
+  // const generateBlade = (center: THREE.Vector3, vArrOffset: number, uv: number[]) => {
+  //   const MID_WIDTH = BLADE_WIDTH * 0.5
+  //   const TIP_OFFSET = 0.1
+  //   const height = BLADE_HEIGHT + Math.random() * BLADE_HEIGHT_VARIATION
+
+  //   const yaw = Math.random() * Math.PI * 2
+  //   const yawUnitVec = new THREE.Vector3(Math.sin(yaw), 0, -Math.cos(yaw))
+  //   const tipBend = Math.random() * Math.PI * 2
+  //   const tipBendUnitVec = new THREE.Vector3(Math.sin(tipBend), 0, -Math.cos(tipBend))
+
+  //   // Find the Bottom Left, Bottom Right, Top Left, Top right, Top Center vertex positions
+  //   const bl = new THREE.Vector3().addVectors(
+  //     center,
+  //     new THREE.Vector3().copy(yawUnitVec).multiplyScalar((BLADE_WIDTH / 2) * 1),
+  //   )
+  //   const br = new THREE.Vector3().addVectors(
+  //     center,
+  //     new THREE.Vector3().copy(yawUnitVec).multiplyScalar((BLADE_WIDTH / 2) * -1),
+  //   )
+  //   const tl = new THREE.Vector3().addVectors(
+  //     center,
+  //     new THREE.Vector3().copy(yawUnitVec).multiplyScalar((MID_WIDTH / 2) * 1),
+  //   )
+  //   const tr = new THREE.Vector3().addVectors(
+  //     center,
+  //     new THREE.Vector3().copy(yawUnitVec).multiplyScalar((MID_WIDTH / 2) * -1),
+  //   )
+  //   const tc = new THREE.Vector3().addVectors(
+  //     center,
+  //     new THREE.Vector3().copy(tipBendUnitVec).multiplyScalar(TIP_OFFSET),
+  //   )
+
+  //   // Get elevation for each vertex position
+  //   const blElevation = getElevation([bl.x, bl.z], terrainUniforms, 0)
+  //   const brElevation = getElevation([br.x, br.z], terrainUniforms, 0)
+  //   const tlElevation = getElevation([tl.x, tl.z], terrainUniforms, 0)
+  //   const trElevation = getElevation([tr.x, tr.z], terrainUniforms, 0)
+  //   const tcElevation = getElevation([tc.x, tc.z], terrainUniforms, 0)
+
+  //   // Apply elevation to each vertex
+  //   bl.y = blElevation
+  //   br.y = brElevation
+  //   tl.y = tlElevation + height / 2
+  //   tr.y = trElevation + height / 2
+  //   tc.y = tcElevation + height
+
+  //   // Vertex Colors
+  //   const black = [0, 0, 0]
+  //   const gray = [0.5, 0.5, 0.5]
+  //   const white = [1.0, 1.0, 1.0]
+
+  //   const verts = [
+  //     { pos: bl.toArray(), uv: uv, color: black },
+  //     { pos: br.toArray(), uv: uv, color: black },
+  //     { pos: tr.toArray(), uv: uv, color: gray },
+  //     { pos: tl.toArray(), uv: uv, color: gray },
+  //     { pos: tc.toArray(), uv: uv, color: white },
+  //   ]
+
+  //   const indices = [
+  //     vArrOffset,
+  //     vArrOffset + 1,
+  //     vArrOffset + 2,
+  //     vArrOffset + 2,
+  //     vArrOffset + 4,
+  //     vArrOffset + 3,
+  //     vArrOffset + 3,
+  //     vArrOffset,
+  //     vArrOffset + 2,
+  //   ]
+
+  //   return { verts, indices }
+  // }
+
   const generateGrassData = () => {
     const positions: number[] = []
     const uvs: number[] = []
@@ -125,7 +206,7 @@ const Grass = ({ getElevation, terrainUniforms, scaleMap }: GrassProps) => {
 
       const x = Math.random() * PLANE_SIZE - PLANE_SIZE / 2
       const z = Math.random() * PLANE_SIZE - PLANE_SIZE / 2
-      // const elevation = getElevation([x, z], terrainUniforms, 0) // or pass time if animated
+
       const pos = new THREE.Vector3(x, 0, z)
 
       const uv = [convertRange(pos.x, surfaceMin, surfaceMax, 0, 1), convertRange(pos.z, surfaceMin, surfaceMax, 0, 1)]
@@ -140,6 +221,81 @@ const Grass = ({ getElevation, terrainUniforms, scaleMap }: GrassProps) => {
     }
     return { positions, uvs, indices, colors }
   }
+
+  //   useEffect(() => {
+  //     const mapSize = PLANE_SIZE * scaleMap
+  //     const instancesPerRow = Math.sqrt(INSTANCES_LIMIT)
+  //     let validInstanceCount = 0
+
+  //     for (let i = 0; i < INSTANCES_LIMIT; i++) {
+  //       const matrix = new THREE.Matrix4()
+  //       const row = Math.floor(i / instancesPerRow)
+  //       const col = i % instancesPerRow
+
+  //       const x = (col - instancesPerRow / 2) * (mapSize / instancesPerRow)
+  //       const z = (row - instancesPerRow / 2) * (mapSize / instancesPerRow)
+  //       const scaledX = x / scaleMap
+  //       const scaledZ = z / scaleMap
+  //       const elevation = getElevation([scaledX, scaledZ], terrainUniforms, 0)
+  //       const scaledElevation = elevation * scaleMap
+
+  //       // Skip instances outside elevation range - don't create them at all
+  //       if (scaledElevation < -0.1 || scaledElevation > 0.1) {
+  //         continue // Skip this instance entirely
+  //       }
+
+  //       const position = new THREE.Vector3(x, scaledElevation, z)
+  //       const scale = new THREE.Vector3(1, 1, 1)
+  //       matrix.compose(position, new THREE.Quaternion(), scale)
+  //       validInstanceCount++
+
+  //       grassRef.current?.setMatrixAt(validInstanceCount - 1, matrix)
+  //     }
+
+  //     console.log(`Rendered ${validInstanceCount} grass instances out of ${INSTANCES_LIMIT}`)
+  //   }, [INSTANCES_LIMIT, scaleMap])
+
+  //  const generateSingleGrassPatchGeometry = () => {
+  //    const positions: number[] = []
+  //    const uvs: number[] = []
+  //    const indices: number[] = []
+  //    const colors: number[] = []
+
+  //    const BLADES_PER_PATCH = 20
+  //    const PATCH_SIZE = 1.0
+  //    let vertexOffset = 0
+
+  //    for (let i = 0; i < BLADES_PER_PATCH; i++) {
+  //      const center = new THREE.Vector3((Math.random() - 0.5) * PATCH_SIZE, 0, (Math.random() - 0.5) * PATCH_SIZE)
+
+  //      // Calculate elevation for this blade position within the patch
+  //      const scaledX = center.x / scaleMap
+  //      const scaledZ = center.z / scaleMap
+  //      const elevation = getElevation([scaledX, scaledZ], terrainUniforms, 0)
+  //      const scaledElevation = elevation * scaleMap
+
+  //      // Skip geometry generation if elevation is outside range
+  //      if (scaledElevation < -0.1 || scaledElevation > 0.1) {
+  //        continue // Skip this blade entirely - no geometry generated
+  //      }
+
+  //      // Set the blade position to the calculated elevation
+  //      center.y = scaledElevation
+
+  //      const blade = generateBlade(center, vertexOffset, [0.5, 0.5])
+  //      blade.verts.forEach((vert) => {
+  //        positions.push(...vert.pos)
+  //        uvs.push(...vert.uv)
+  //        colors.push(...vert.color)
+  //      })
+  //      blade.indices.forEach((indice) => indices.push(indice))
+
+  //      vertexOffset += 5
+  //    }
+
+  //    console.log(`Generated geometry for ${vertexOffset / 5} grass blades in patch`)
+  //    return { positions, uvs, indices, colors }
+  //  }
 
   const geom = useMemo(() => {
     const { positions, uvs, indices, colors } = generateGrassData()
