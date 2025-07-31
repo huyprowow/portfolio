@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react'
+import React, { useEffect, useMemo } from 'react'
 import * as THREE from 'three'
 import CustomShaderMaterialVanilla from 'three-custom-shader-material/vanilla'
 import waterVertexShader from '@/_shaders/water/vertex.glsl'
@@ -11,6 +11,10 @@ const Water = () => {
   const scaleMap = dfMapSetting.scaleTerrain
 
   const waterNoiseTexture = useLoader(THREE.TextureLoader, Assets.TEXTURE.NOISE.WATER_NOISE)
+  // Enable smooth filtering
+  waterNoiseTexture.minFilter = THREE.LinearFilter
+  waterNoiseTexture.magFilter = THREE.LinearFilter
+  waterNoiseTexture.generateMipmaps = true
 
   //Water Surface geometry
   const waterSurfaceGeometry = useMemo(() => {
@@ -45,6 +49,15 @@ const Water = () => {
   useFrame((state) => {
     waterSurfaceMaterial.uniforms.uTime.value = state.clock.getElapsedTime()
   })
+
+  useEffect(() => {
+    return () => {
+      waterSurfaceMaterial.dispose()
+      waterSurfaceGeometry.dispose()
+      waterNoiseTexture.dispose()
+    }
+  }, [waterSurfaceMaterial, waterSurfaceGeometry, waterNoiseTexture])
+
   return (
     <mesh
       geometry={waterSurfaceGeometry}

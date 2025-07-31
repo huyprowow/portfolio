@@ -112,6 +112,7 @@ export const Assets = {
     },
     NOISE: {
       WATER_NOISE: 'assets/textures/noise/waterSurface_noise.png',
+      PERLIN: 'assets/textures/noise/perlin.png',
     },
   },
   AUDIO: {

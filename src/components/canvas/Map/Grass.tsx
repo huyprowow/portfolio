@@ -7,6 +7,7 @@ import { useFrame, useLoader } from '@react-three/fiber'
 import dfMapSetting from '@/settings/df_map_setting.json'
 import { Instance, Instances } from '@react-three/drei'
 import CustomShaderMaterialVanilla from 'three-custom-shader-material/vanilla'
+import { useBoundStore } from '@/store/store'
 const PLANE_SIZE = 10
 // const BLADE_COUNT = 1000 //000
 const INSTANCES_LIMIT = 10000 * 1000 //* 2000
@@ -14,19 +15,30 @@ const INSTANCES_LIMIT = 10000 * 1000 //* 2000
 // single patch instanced
 // const BLADES_PER_PATCH = 20
 // const PATCH_SIZE = 1.0
+const BLADE_WIDTH = 0.1
+const BLADE_HEIGHT = 2.8
+const BLADE_HEIGHT_VARIATION = 0.6
 
 interface GrassProps {
   getElevation: (position: [number, number], uniforms: any, time: number) => number
   terrainUniforms: any
   scaleMap: number
 }
-
 const Grass = ({ getElevation, terrainUniforms, scaleMap }: GrassProps) => {
   const grassRef = useRef<THREE.InstancedMesh>(null)
-  let BLADE_WIDTH = 0.1
-  let BLADE_HEIGHT = 2.8
-  let BLADE_HEIGHT_VARIATION = 0.6
+  const playerRef = useBoundStore((state) => state.playerRef)
 
+  useEffect(() => {
+    if (!playerRef) return
+    if (!playerRef.current) return
+    const playerPos = new THREE.Vector3(
+      playerRef.current?.translation().x,
+      playerRef.current?.translation().y,
+      playerRef.current?.translation().z,
+    )
+    // console.log('__playerPos', playerPos)
+  }, [playerRef])
+  
   // useEffect(() => {
   //   const mapSize = PLANE_SIZE * scaleMap
   //   const instancesPerRow = Math.sqrt(INSTANCES_LIMIT)
@@ -84,68 +96,68 @@ const Grass = ({ getElevation, terrainUniforms, scaleMap }: GrassProps) => {
   //   return { positions, uvs, indices, colors }
   // }
 
-  const generateBlade = (center: THREE.Vector3, vArrOffset: number, uv: number[]) => {
-    const MID_WIDTH = BLADE_WIDTH * 0.5
-    const TIP_OFFSET = 0.1
-    const height = BLADE_HEIGHT + Math.random() * BLADE_HEIGHT_VARIATION
+  // const generateBlade = (center: THREE.Vector3, vArrOffset: number, uv: number[]) => {
+  //   const MID_WIDTH = BLADE_WIDTH * 0.5
+  //   const TIP_OFFSET = 0.1
+  //   const height = BLADE_HEIGHT + Math.random() * BLADE_HEIGHT_VARIATION
 
-    const yaw = Math.random() * Math.PI * 2
-    const yawUnitVec = new THREE.Vector3(Math.sin(yaw), 0, -Math.cos(yaw))
-    const tipBend = Math.random() * Math.PI * 2
-    const tipBendUnitVec = new THREE.Vector3(Math.sin(tipBend), 0, -Math.cos(tipBend))
+  //   const yaw = Math.random() * Math.PI * 2
+  //   const yawUnitVec = new THREE.Vector3(Math.sin(yaw), 0, -Math.cos(yaw))
+  //   const tipBend = Math.random() * Math.PI * 2
+  //   const tipBendUnitVec = new THREE.Vector3(Math.sin(tipBend), 0, -Math.cos(tipBend))
 
-    // Find the Bottom Left, Bottom Right, Top Left, Top right, Top Center vertex positions
-    const bl = new THREE.Vector3().addVectors(
-      center,
-      new THREE.Vector3().copy(yawUnitVec).multiplyScalar((BLADE_WIDTH / 2) * 1),
-    )
-    const br = new THREE.Vector3().addVectors(
-      center,
-      new THREE.Vector3().copy(yawUnitVec).multiplyScalar((BLADE_WIDTH / 2) * -1),
-    )
-    const tl = new THREE.Vector3().addVectors(
-      center,
-      new THREE.Vector3().copy(yawUnitVec).multiplyScalar((MID_WIDTH / 2) * 1),
-    )
-    const tr = new THREE.Vector3().addVectors(
-      center,
-      new THREE.Vector3().copy(yawUnitVec).multiplyScalar((MID_WIDTH / 2) * -1),
-    )
-    const tc = new THREE.Vector3().addVectors(
-      center,
-      new THREE.Vector3().copy(tipBendUnitVec).multiplyScalar(TIP_OFFSET),
-    )
+  //   // Find the Bottom Left, Bottom Right, Top Left, Top right, Top Center vertex positions
+  //   const bl = new THREE.Vector3().addVectors(
+  //     center,
+  //     new THREE.Vector3().copy(yawUnitVec).multiplyScalar((BLADE_WIDTH / 2) * 1),
+  //   )
+  //   const br = new THREE.Vector3().addVectors(
+  //     center,
+  //     new THREE.Vector3().copy(yawUnitVec).multiplyScalar((BLADE_WIDTH / 2) * -1),
+  //   )
+  //   const tl = new THREE.Vector3().addVectors(
+  //     center,
+  //     new THREE.Vector3().copy(yawUnitVec).multiplyScalar((MID_WIDTH / 2) * 1),
+  //   )
+  //   const tr = new THREE.Vector3().addVectors(
+  //     center,
+  //     new THREE.Vector3().copy(yawUnitVec).multiplyScalar((MID_WIDTH / 2) * -1),
+  //   )
+  //   const tc = new THREE.Vector3().addVectors(
+  //     center,
+  //     new THREE.Vector3().copy(tipBendUnitVec).multiplyScalar(TIP_OFFSET),
+  //   )
 
-    tl.y += height / 2
-    tr.y += height / 2
-    tc.y += height
+  //   tl.y += height / 2
+  //   tr.y += height / 2
+  //   tc.y += height
 
-    // Vertex Colors
-    const black = [0, 0, 0]
-    const gray = [0.5, 0.5, 0.5]
-    const white = [1.0, 1.0, 1.0]
+  //   // Vertex Colors
+  //   const black = [0, 0, 0]
+  //   const gray = [0.5, 0.5, 0.5]
+  //   const white = [1.0, 1.0, 1.0]
 
-    const verts = [
-      { pos: bl.toArray(), uv: uv, color: black },
-      { pos: br.toArray(), uv: uv, color: black },
-      { pos: tr.toArray(), uv: uv, color: gray },
-      { pos: tl.toArray(), uv: uv, color: gray },
-      { pos: tc.toArray(), uv: uv, color: white },
-    ]
-    const indices = [
-      vArrOffset,
-      vArrOffset + 1,
-      vArrOffset + 2,
-      vArrOffset + 2,
-      vArrOffset + 4,
-      vArrOffset + 3,
-      vArrOffset + 3,
-      vArrOffset,
-      vArrOffset + 2,
-    ]
+  //   const verts = [
+  //     { pos: bl.toArray(), uv: uv, color: black },
+  //     { pos: br.toArray(), uv: uv, color: black },
+  //     { pos: tr.toArray(), uv: uv, color: gray },
+  //     { pos: tl.toArray(), uv: uv, color: gray },
+  //     { pos: tc.toArray(), uv: uv, color: white },
+  //   ]
+  //   const indices = [
+  //     vArrOffset,
+  //     vArrOffset + 1,
+  //     vArrOffset + 2,
+  //     vArrOffset + 2,
+  //     vArrOffset + 4,
+  //     vArrOffset + 3,
+  //     vArrOffset + 3,
+  //     vArrOffset,
+  //     vArrOffset + 2,
+  //   ]
 
-    return { verts, indices }
-  }
+  //   return { verts, indices }
+  // }
 
   // const geom = useMemo(() => {
   //   const { positions, uvs, indices, colors } = generateSingleGrassPatchGeometry()
@@ -174,8 +186,8 @@ const Grass = ({ getElevation, terrainUniforms, scaleMap }: GrassProps) => {
       const scaledZ = z / scaleMap
       const elevation = getElevation([scaledX, scaledZ], terrainUniforms, 0)
       const scaledElevation = elevation * scaleMap
-      const minScaledElevation = -0.1 * scaleMap
-      const maxScaledElevation = 0.15 * scaleMap
+      const minScaledElevation = -0.06 * scaleMap
+      const maxScaledElevation = 0.12 * scaleMap
 
       if (scaledElevation < minScaledElevation || scaledElevation > maxScaledElevation) {
         continue
@@ -290,6 +302,32 @@ const Grass = ({ getElevation, terrainUniforms, scaleMap }: GrassProps) => {
   useFrame((state) => {
     grassUniforms.current.uTime.value = state.clock.getElapsedTime()
   })
+
+  useEffect(() => {
+    return () => {
+      // Dispose geometry
+      if (geom) {
+        geom.dispose()
+      }
+
+      // Dispose material
+      if (grassMaterial) {
+        grassMaterial.dispose()
+      }
+
+      // Dispose texture
+      if (grassTexture) {
+        grassTexture.dispose()
+      }
+
+      // Dispose instanced mesh
+      if (grassRef.current) {
+        grassRef.current.dispose()
+      }
+
+      console.log('Grass component disposed')
+    }
+  }, [geom, grassMaterial, grassTexture])
 
   return (
     <>

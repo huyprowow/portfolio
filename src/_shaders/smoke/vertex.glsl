@@ -21,7 +21,7 @@ void main() {
   newPosition.xz += windOffset;
 
     //Final position
-  gl_Position = projectionMatrix * modelViewMatrix * vec4(newPosition, 1.0);
+  csm_PositionRaw = projectionMatrix * modelViewMatrix * vec4(newPosition, 1.0);
 
     //varying 
   vUv = uv;

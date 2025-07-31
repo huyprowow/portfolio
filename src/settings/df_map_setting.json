@@ -17,6 +17,18 @@
         "x": 140,
         "y": 0,
         "z": 40
+      },
+      "smoke": {
+        "startPosition": {
+          "x": 140,
+          "y": 8,
+          "z": 40
+        },
+        "defaultScale": {
+          "x": 3,
+          "y": 6,
+          "z": 3
+        }
       }
     },
     "woodBlock": {
@@ -40,10 +52,9 @@
         "z": 0
       }
     },
-    "grass": {
-    }
+    "grass": {}
   },
 
-  "scaleTerrain":100,
+  "scaleTerrain": 100,
   "scaleSea": 100
 }

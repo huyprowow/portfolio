@@ -6,8 +6,10 @@ import { Spector } from 'spectorjs'
 
 export function DebugUI() {
   const isDebugMode = useDebugMode()
-  const spector = new Spector()
-  spector.displayUI()
+  if (isDebugMode) {
+    const spector = new Spector()
+    spector.displayUI()
+  } 
   return (
     <Leva
       hidden={!isDebugMode}

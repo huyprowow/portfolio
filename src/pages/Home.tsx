@@ -34,7 +34,8 @@ export default function Home() {
 
   useEffect(() => {
     console.log(import.meta.env.VITE_DEBUG_MODE)
-    if (!isDebugMode && import.meta.env.VITE_DEBUG_MODE) {
+
+    if (import.meta.env.VITE_DEBUG_MODE === 'true' && !isDebugMode) {
       startDebug()
     }
   }, [isDebugMode])
@@ -66,7 +67,7 @@ export default function Home() {
     <>
       <DebugUI />
       <KeyboardControls map={map}>
-        <Tutorial/>
+        <Tutorial />
         <UI />
         <SceneView className='relative h-full sm:w-full' orbit={orbit}>
           <SceneCommon color='#000000' />
