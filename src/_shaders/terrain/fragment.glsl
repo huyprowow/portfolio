@@ -107,10 +107,10 @@ void main() {
   color = mix(color, textureRockWallDiffuse.rgb, rockMix);
 
   // topMountain
-  float topMountainThreshold = 0.45; // threshold for topMountain
-  topMountainThreshold += simplexNoise2d(vPosition.xz * 15.0) * 0.1; // add some noise to the threshold
-  float topMountainMix = step(topMountainThreshold, vPosition.y);
-  color = mix(color, textureTopMountainDiffuse.rgb, topMountainMix);
+  // float topMountainThreshold = 0.45; // threshold for topMountain
+  // topMountainThreshold += simplexNoise2d(vPosition.xz * 15.0) * 0.1; // add some noise to the threshold
+  // float topMountainMix = step(topMountainThreshold, vPosition.y);
+  // color = mix(color, textureTopMountainDiffuse.rgb, topMountainMix);
 
   //Final color
   csm_DiffuseColor = vec4(color, 1.0);

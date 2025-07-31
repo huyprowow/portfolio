@@ -113,6 +113,10 @@ const Terrain = () => {
   const topMountainDisplacementTexture = useLoader(THREE.TextureLoader, Assets.TEXTURE.TOP_MOUNTAIN.HEIGHT)
   const topMountainNORMALTexture = useLoader(THREE.TextureLoader, Assets.TEXTURE.TOP_MOUNTAIN.NORMAL)
 
+  // pebbleGroundDiffuseTexture.wrapS = THREE.RepeatWrapping
+  // pebbleGroundDiffuseTexture.wrapT = THREE.RepeatWrapping
+
+
   // Leva controls for all uniforms and colors
   const {
     uPositionFrequency,

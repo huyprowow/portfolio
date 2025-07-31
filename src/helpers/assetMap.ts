@@ -108,8 +108,11 @@ export const Assets = {
       NORMAL: 'assets/textures/snow_02_1k/snow_02_nor_gl_1k.jpg',
     },
     GRASS: {
-      ALBEDO: 'assets/textures/grass.jpg'
-    }
+      ALBEDO: 'assets/textures/grass.jpg',
+    },
+    NOISE: {
+      WATER_NOISE: 'assets/textures/noise/waterSurface_noise.png',
+    },
   },
   AUDIO: {
     BGM: {
