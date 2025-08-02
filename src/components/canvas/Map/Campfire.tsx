@@ -5,9 +5,11 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 import * as THREE from 'three'
 import smokeVertexShader from '@/_shaders/smoke/vertex.glsl'
 import smokeFragmentShader from '@/_shaders/smoke/fragment.glsl'
-import { useEffect, useMemo } from 'react'
+import { useEffect, useLayoutEffect, useMemo, useRef } from 'react'
 import CustomShaderMaterialVanilla from 'three-custom-shader-material/vanilla'
 import dfMapSetting from '@/settings/df_map_setting.json'
+import fireVertexShader from '@/_shaders/fire/vertex.glsl'
+import fireFragmentShader from '@/_shaders/fire/fragment.glsl'
 
 const Smoke = () => {
   //geometry
@@ -68,6 +70,76 @@ const Smoke = () => {
   )
 }
 
+const Fire = () => {
+  const ref = useRef<THREE.Mesh>(null)
+
+  const fireGeometry = useMemo(() => {
+    const geometry = new THREE.BoxGeometry(1, 1, 1)
+    // const geometry = new THREE.CylinderGeometry(0.5, 0.5, 2, 8, 1, true)
+    return geometry
+  }, [])
+
+  const fireTexture = useLoader(THREE.TextureLoader, Assets.TEXTURE.FIRE)
+  fireTexture.magFilter = fireTexture.minFilter = THREE.LinearFilter
+  fireTexture.wrapS = fireTexture.wrapT = THREE.ClampToEdgeWrapping
+
+  const uniforms = useRef({
+    uTime: new THREE.Uniform(0),
+    fireTex: new THREE.Uniform<THREE.Texture>(fireTexture),
+    color: new THREE.Uniform<THREE.Color>(new THREE.Color(0xeeeeee)),
+    time: new THREE.Uniform(0.0),
+    seed: new THREE.Uniform(Math.random() * 19.19),
+    invModelMatrix: new THREE.Uniform<THREE.Matrix4>(new THREE.Matrix4()),
+    scale: new THREE.Uniform(new THREE.Vector3(1, 1, 1)),
+    noiseScale: new THREE.Uniform(new THREE.Vector4(1, 2, 1, 0.3)),
+    magnitude: new THREE.Uniform(2.5),
+    lacunarity: new THREE.Uniform(3.0),
+    gain: new THREE.Uniform(0.6),
+  })
+
+  const fireMaterial = useMemo(() => {
+    const material = new CustomShaderMaterialVanilla({
+      vertexShader: fireVertexShader,
+      fragmentShader: fireFragmentShader,
+      baseMaterial: THREE.MeshStandardMaterial,
+      uniforms: uniforms.current,
+      defines: {
+        ITERATIONS: 20,
+        OCTIVES: 3,
+      },
+      transparent: true,
+      depthWrite: false,
+      side: THREE.DoubleSide,
+    })
+    return material
+  }, [])
+  useFrame((state) => {
+    if (!ref.current) return
+    uniforms.current.time.value = state.clock.getElapsedTime()
+    const invModelMatrix = uniforms.current.invModelMatrix.value
+    ref.current?.updateMatrixWorld()
+    invModelMatrix.copy(ref.current?.matrixWorld).invert()
+    uniforms.current.invModelMatrix.value = invModelMatrix
+  })
+  return (
+    <mesh
+      ref={ref}
+      geometry={fireGeometry}
+      material={fireMaterial}
+      position={[
+        dfMapSetting.object.campfire.fire.startPosition.x,
+        dfMapSetting.object.campfire.fire.startPosition.y,
+        dfMapSetting.object.campfire.fire.startPosition.z,
+      ]}
+      scale={[
+        dfMapSetting.object.campfire.fire.defaultScale.x,
+        dfMapSetting.object.campfire.fire.defaultScale.y,
+        dfMapSetting.object.campfire.fire.defaultScale.z,
+      ]}
+    />
+  )
+}
+
 const Campfire = () => {
   const scene = useLoader(GLTFLoader, Assets.CAMPFIRE)
 
@@ -85,6 +157,7 @@ const Campfire = () => {
         />
       </RigidBody>
       <Smoke />
+      <Fire />
     </>
   )
 }

@@ -1,25 +1,23 @@
-import { Button } from '@/components/ui/button'
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
-import { useState } from 'react'
+import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog'
 import './SettingDialog.scss'
 import '@/styles/index.scss'
 import SettingContent from './SettingContent/SettingContent'
+import { useBoundStore } from '@/store/store'
 export const SettingDialog = ({ children }: { children: React.ReactNode }) => {
-  const [open, setOpen] = useState(false)
+  const setIsOpenSetting = useBoundStore((state) => state.setIsOpenSetting)
+  const isOpenSetting = useBoundStore((state) => state.ui.isOpenSetting)
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={isOpenSetting} onOpenChange={setIsOpenSetting}>
       <form>
-        {!open && children}
+        {!isOpenSetting && children}
         <DialogContent
           className='DialogContent glass-effect '
           style={{
-            zIndex: 10000,
+            zIndex: 100000,
             borderRadius: '0px',
           }}
           hideOverlay
-          aria-describedby={
-            undefined
-          }
+          aria-describedby={undefined}
         >
           <DialogTitle className='sr-only'>Setting</DialogTitle>
           <SettingContent />

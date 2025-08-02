@@ -29,6 +29,18 @@
           "y": 6,
           "z": 3
         }
+      },
+      "fire": {
+        "startPosition": {
+          "x": 140,
+          "y": 5,
+          "z": 40
+        },
+        "defaultScale": {
+          "x": 3,
+          "y": 9,
+          "z": 3
+        }
       }
     },
     "woodBlock": {

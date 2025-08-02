@@ -8,6 +8,7 @@ import dfMapSetting from '@/settings/df_map_setting.json'
 import { Instance, Instances } from '@react-three/drei'
 import CustomShaderMaterialVanilla from 'three-custom-shader-material/vanilla'
 import { useBoundStore } from '@/store/store'
+import { useControls } from 'leva'
 const PLANE_SIZE = 10
 // const BLADE_COUNT = 1000 //000
 const INSTANCES_LIMIT = 10000 * 1000 //* 2000
@@ -19,6 +20,14 @@ const BLADE_WIDTH = 0.1
 const BLADE_HEIGHT = 2.8
 const BLADE_HEIGHT_VARIATION = 0.6
 
+const levaConfig = {
+  uWindStrength: {
+    min: 1.0,
+    max: 5.0,
+    step: 0.1,
+    value: 1.0,
+  },
+}
 interface GrassProps {
   getElevation: (position: [number, number], uniforms: any, time: number) => number
   terrainUniforms: any
@@ -27,6 +36,7 @@ interface GrassProps {
 const Grass = ({ getElevation, terrainUniforms, scaleMap }: GrassProps) => {
   const grassRef = useRef<THREE.InstancedMesh>(null)
   const playerRef = useBoundStore((state) => state.playerRef)
+  const { uWindStrength } = useControls('Grass', levaConfig)
 
   useEffect(() => {
     if (!playerRef) return
@@ -38,7 +48,7 @@ const Grass = ({ getElevation, terrainUniforms, scaleMap }: GrassProps) => {
     )
     // console.log('__playerPos', playerPos)
   }, [playerRef])
-  
+
   // useEffect(() => {
   //   const mapSize = PLANE_SIZE * scaleMap
   //   const instancesPerRow = Math.sqrt(INSTANCES_LIMIT)
@@ -173,6 +183,10 @@ const Grass = ({ getElevation, terrainUniforms, scaleMap }: GrassProps) => {
   // }, [])
 
   useEffect(() => {
+    grassUniforms.current.uWindStrength.value = uWindStrength
+  }, [uWindStrength])
+
+  useEffect(() => {
     const mapSize = PLANE_SIZE * scaleMap
     let validInstanceCount = 0
 
@@ -277,7 +291,7 @@ const Grass = ({ getElevation, terrainUniforms, scaleMap }: GrassProps) => {
     texture1: new THREE.Uniform(grassTexture),
     uTime: new THREE.Uniform(0),
     uMapScale: new THREE.Uniform(scaleMap),
-    uWindStrength: new THREE.Uniform(1.0),
+    uWindStrength: new THREE.Uniform(uWindStrength),
   })
 
   const grassMaterial = useMemo(() => {

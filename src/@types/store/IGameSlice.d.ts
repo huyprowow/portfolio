@@ -8,4 +8,8 @@ interface IGameSlice {
     mode: EGameMode
   }
   setGameMode: (modeOrSetterFn: ReactStyleStateSetter<EGameMode>) => void
+  ui: {
+    isOpenSetting: boolean
+  }
+  setIsOpenSetting: (isOpenSetting: boolean) => void
 }
