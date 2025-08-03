@@ -12,18 +12,19 @@ import { simplexNoise2d } from '@/helpers/noiseFunction'
 import CustomShaderMaterialVanilla from 'three-custom-shader-material/vanilla'
 import dfMapSetting from '@/settings/df_map_setting.json'
 import Grass from './Grass'
+import Tree from './Tree'
 
 const levaConfig = {
   uPositionFrequency: { value: 0.2, min: 0, max: 1, step: 0.001 },
   uStrength: { value: 2.0, min: 0, max: 10, step: 0.001 },
   uWarpFrequency: { value: 5, min: 0, max: 10, step: 0.001 },
   uWarpStrength: { value: 0.5, min: 0, max: 1, step: 0.001 },
-  colorWaterDeep: { value: '#002b3d' },
-  colorWaterSurface: { value: '#66a8ff' },
-  colorSand: { value: '#ffe894' },
-  colorGrass: { value: '#85d534' },
-  colorTopMountain: { value: '#ffffff' },
-  colorRock: { value: '#bfbd8d' },
+  // colorWaterDeep: { value: '#002b3d' },
+  // colorWaterSurface: { value: '#66a8ff' },
+  // colorSand: { value: '#ffe894' },
+  // colorGrass: { value: '#85d534' },
+  // colorTopMountain: { value: '#ffffff' },
+  // colorRock: { value: '#bfbd8d' },
 }
 
 const scaleMap = dfMapSetting.scaleTerrain
@@ -115,7 +116,6 @@ const Terrain = () => {
 
   // pebbleGroundDiffuseTexture.wrapS = THREE.RepeatWrapping
   // pebbleGroundDiffuseTexture.wrapT = THREE.RepeatWrapping
-
 
   // Leva controls for all uniforms and colors
   const {
@@ -252,6 +252,7 @@ const Terrain = () => {
 
   return (
     <>
+      <Tree getElevation={getElevation} />
       <Grass
         getElevation={getElevation}
         terrainUniforms={{

@@ -9,4 +9,7 @@ export enum Controls {
   jump = 'jump',
   changeCamera = 'changeCamera',
   changeMode = 'changeMode',
+  block = 'block',
+  attack = 'attack',
+  buff = 'buff',
 }

@@ -85,16 +85,15 @@ const Fire = () => {
 
   const uniforms = useRef({
     uTime: new THREE.Uniform(0),
-    fireTex: new THREE.Uniform<THREE.Texture>(fireTexture),
-    color: new THREE.Uniform<THREE.Color>(new THREE.Color(0xeeeeee)),
-    time: new THREE.Uniform(0.0),
-    seed: new THREE.Uniform(Math.random() * 19.19),
-    invModelMatrix: new THREE.Uniform<THREE.Matrix4>(new THREE.Matrix4()),
-    scale: new THREE.Uniform(new THREE.Vector3(1, 1, 1)),
-    noiseScale: new THREE.Uniform(new THREE.Vector4(1, 2, 1, 0.3)),
-    magnitude: new THREE.Uniform(2.5),
-    lacunarity: new THREE.Uniform(3.0),
-    gain: new THREE.Uniform(0.6),
+    uFireTex: new THREE.Uniform<THREE.Texture>(fireTexture),
+    uColor: new THREE.Uniform<THREE.Color>(new THREE.Color(0xeeeeee)),
+    uSeed: new THREE.Uniform(Math.random() * 19.19),
+    uInvModelMatrix: new THREE.Uniform<THREE.Matrix4>(new THREE.Matrix4()),
+    uScale: new THREE.Uniform(new THREE.Vector3(1, 1, 1)),
+    uNoiseScale: new THREE.Uniform(new THREE.Vector4(1, 2, 1, 0.3)),
+    uMagnitude: new THREE.Uniform(2.5),
+    uLacunarity: new THREE.Uniform(3.0),
+    uGain: new THREE.Uniform(0.6),
   })
 
   const fireMaterial = useMemo(() => {
@@ -115,12 +114,20 @@ const Fire = () => {
   }, [])
   useFrame((state) => {
     if (!ref.current) return
-    uniforms.current.time.value = state.clock.getElapsedTime()
-    const invModelMatrix = uniforms.current.invModelMatrix.value
+    uniforms.current.uTime.value = state.clock.getElapsedTime()
+    const invModelMatrix = uniforms.current.uInvModelMatrix.value
     ref.current?.updateMatrixWorld()
     invModelMatrix.copy(ref.current?.matrixWorld).invert()
-    uniforms.current.invModelMatrix.value = invModelMatrix
+    uniforms.current.uInvModelMatrix.value = invModelMatrix
   })
+
+  useEffect(() => {
+    return () => {
+      fireMaterial.dispose()
+      fireGeometry.dispose()
+      fireTexture.dispose()
+    }
+  }, [])
   return (
     <mesh
       ref={ref}
@@ -142,6 +149,16 @@ const Fire = () => {
 
 const Campfire = () => {
   const scene = useLoader(GLTFLoader, Assets.CAMPFIRE)
+
+  useEffect(() => {
+    return () => {
+      scene.scene.traverse((child) => {
+        if (child instanceof THREE.Mesh) {
+          child.material.dispose()
+        }
+      })
+    }
+  }, [])
 
   return (
     <>

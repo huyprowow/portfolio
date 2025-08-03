@@ -16,7 +16,7 @@
       "name": "SWORD_AND_SHIELD_JUMP_2"
     },
     "attack": {
-      "name": "SWORD_AND_SHIELD_ATTACK"
+      "name": "SWORD_AND_SHIELD_SLASH"
     },
     "kick": {
       "name": "SWORD_AND_SHIELD_KICK"
@@ -55,5 +55,4 @@
     "y": 0,
     "z": 0
   }
-
 }

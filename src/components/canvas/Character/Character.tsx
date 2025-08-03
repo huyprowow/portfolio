@@ -29,6 +29,7 @@ import { useAnimationModel } from '@/hooks/useAnimationModel'
 import characterSetting from '@/settings/df_character_setting.json'
 import { mobileAndTabletCheck } from '@/helpers/mobileAndTabletCheck'
 import { EGameMode } from '@/constant/enum'
+import SkillVFX from '../VFX/SkillVFX'
 
 console.log(characterSetting)
 interface CharacterProps {
@@ -77,6 +78,126 @@ const Character: React.FC<CharacterProps> = (props) => {
     }
   }, [nodes, setCharacter])
 
+  const playSkillAnimation = (
+    skillName: string,
+    timeoutRef: React.MutableRefObject<NodeJS.Timeout | null>,
+    onComplete?: () => void,
+  ) => {
+    console.log(`skill${skillName}Character`)
+
+    const action = actionMap.get(characterSetting.animation[skillName].name)
+    if (action) {
+      action.reset()
+      action.setLoop(THREE.LoopOnce, 1)
+      action.clampWhenFinished = true
+      action.fadeIn(0.15).play()
+    }
+
+    setCurrentAction(characterSetting.animation[skillName].name)
+    const duration = action?.getClip().duration ?? 1
+
+    timeoutRef.current = setTimeout(() => {
+      if (onComplete) {
+        onComplete()
+      } else {
+        setCurrentAction(characterSetting.animation.idle.name)
+      }
+      timeoutRef.current = null
+    }, duration * 1000)
+  }
+  const onCompleteSkill = () => {
+    const keys = getKeys()
+    const isMoving = keys.forward || keys.back || keys.left || keys.right
+    if (isMoving) {
+      setCurrentAction(characterSetting.animation.walk.name)
+    } else {
+      setCurrentAction(characterSetting.animation.idle.name)
+    }
+  }
+  const [activeVFX, setActiveVFX] = useState<
+    Array<{
+      id: string
+      type: 'attack' | 'block' | 'powerUp'
+      position: [number, number, number]
+      rotation: [number, number, number]
+    }>
+  >([])
+  const blockTimeout = useRef<NodeJS.Timeout | null>(null)
+  const skillBlockCharacter = () => {
+    playSkillAnimation('block', blockTimeout, onCompleteSkill)
+
+    // Add VFX for block
+    if (player.current) {
+      const pos = player.current.translation()
+      const rotation = player.current.rotation()
+      const vfxId = `block-${Date.now()}`
+
+      // Tính toán hướng phía trước của character
+      const characterForward = new THREE.Vector3(0, 0, 1) // Forward direction
+      characterForward.applyQuaternion(new THREE.Quaternion(rotation.x, rotation.y, rotation.z, rotation.w))
+
+      // Vị trí phía trước character
+      const shieldDistance = 7.0 // Khoảng cách từ character
+      const frontPosition: [number, number, number] = [
+        pos.x + characterForward.x * shieldDistance,
+        pos.y + characterSetting.collision.halfHeight + characterSetting.collision.radius,
+        pos.z + characterForward.z * shieldDistance,
+      ]
+
+      let shieldRotation = [0, Math.atan2(characterForward.x, characterForward.z), 0]
+      
+      const angle = Math.atan2(characterForward.x, characterForward.z)
+      // Tính tilt dựa trên góc
+      if (angle > -Math.PI / 4 && angle < Math.PI / 4) {
+        // Nhìn về phía trước
+        shieldRotation[0] = -Math.PI / 4
+      } else if (angle > Math.PI / 4 && angle < (3 * Math.PI) / 4) {
+        // Nhìn sang phải
+        shieldRotation[2] = -Math.PI / 4
+      } else if (angle > (3 * Math.PI) / 4 || angle < (-3 * Math.PI) / 4) {
+        // Nhìn về phía sau
+        shieldRotation[0] = Math.PI / 4
+      } else {
+        // Nhìn sang trái
+        shieldRotation[2] = Math.PI / 4
+      }
+
+      setActiveVFX((prev) => [
+        ...prev,
+        {
+          id: vfxId,
+          type: 'block',
+          position: frontPosition,
+          rotation: shieldRotation,
+        },
+      ])
+    }
+  }
+
+  const attackTimeout = useRef<NodeJS.Timeout | null>(null)
+  const skillAttackCharacter = () => {
+    playSkillAnimation('attack', attackTimeout, onCompleteSkill)
+  }
+
+  const buffTimeout = useRef<NodeJS.Timeout | null>(null)
+  const skillBuffCharacter = () => {
+    playSkillAnimation('powerUp', buffTimeout, onCompleteSkill)
+
+    // Add VFX for buff
+    if (player.current) {
+      const pos = player.current.translation()
+      const vfxId = `powerUp-${Date.now()}`
+      setActiveVFX((prev) => [
+        ...prev,
+        {
+          id: vfxId,
+          type: 'powerUp',
+          position: [pos.x, pos.y + characterSetting.collision.halfHeight, pos.z],
+        },
+      ])
+    }
+  }
+
   // hear jump key press
   useEffect(() => {
     const unSubscribeJumpKey = subscribeKeys(
@@ -87,8 +208,35 @@ const Character: React.FC<CharacterProps> = (props) => {
         }
       },
     )
+    const unSubscribeSkillBlockKey = subscribeKeys(
+      (state) => state.block,
+      (block) => {
+        if (block) {
+          skillBlockCharacter()
+        }
+      },
+    )
+    const unSubscribeSkillAttackKey = subscribeKeys(
+      (state) => state.attack,
+      (attack) => {
+        if (attack) {
+          skillAttackCharacter()
+        }
+      },
+    )
+    const unSubscribeSkillBuffKey = subscribeKeys(
+      (state) => state.buff,
+      (buff) => {
+        if (buff) {
+          skillBuffCharacter()
+        }
+      },
+    )
     return () => {
       unSubscribeJumpKey()
+      unSubscribeSkillBlockKey()
+      unSubscribeSkillAttackKey()
+      unSubscribeSkillBuffKey()
     }
   }, [subscribeKeys])
 
@@ -280,6 +428,21 @@ const Character: React.FC<CharacterProps> = (props) => {
   const prevKeys = useRef({ forward: false, back: false, left: false, right: false, jump: false })
   const gameMode = useBoundStore((state) => state.game.mode)
 
+  const resetGame = () => {
+    console.log('resetGame')
+    player.current?.setTranslation(
+      {
+        x: characterSetting.startPosition.x,
+        y: characterSetting.startPosition.y,
+        z: characterSetting.startPosition.z,
+      },
+      true,
+    ) //reset position
+    player.current?.setLinvel({ x: 0, y: 0, z: 0 }, true) //remove translation force
+    player.current?.setAngvel({ x: 0, y: 0, z: 0 }, true) //remove angular force
+    setCurrentAction(characterSetting.animation.idle.name)
+  }
+
   useFrame((state, delta) => {
     const keys = getKeys()
     const isMoving = keys.forward || keys.back || keys.left || keys.right
@@ -347,6 +510,14 @@ const Character: React.FC<CharacterProps> = (props) => {
 
     mixer.update(delta)
     prevKeys.current = keys
+
+    //check character fall out map
+    const characterPosition = player.current?.translation()
+    if (characterPosition) {
+      if (characterPosition.y < -150) {
+        resetGame()
+      }
+    }
   })
 
   return (
@@ -370,11 +541,7 @@ const Character: React.FC<CharacterProps> = (props) => {
           characterSetting.startPosition.z,
         ]}
       >
-        <primitive
-          object={nodes}
-          scale={0.1}
-          position={[0, 0, 0]}
-        ></primitive>
+        <primitive object={nodes} scale={0.1} position={[0, 0, 0]}></primitive>
         {/* <mesh geometry={nodes.children[0].geometry} material={nodes.children[0].material} scale={0.1}></mesh> */}
         {/* {helmet && (
           <mesh geometry={nodes.children[1].geometry} material={nodes.children[1].material} scale={0.1}></mesh>
@@ -395,6 +562,19 @@ const Character: React.FC<CharacterProps> = (props) => {
           angularDamping={1}
         />
       </RigidBody>
+
+      {/* Render VFX */}
+      {activeVFX.map((vfx) => (
+        <SkillVFX
+          key={vfx.id}
+          type={vfx.type}
+          position={vfx.position}
+          rotation={vfx.rotation}
+          onComplete={() => {
+            setActiveVFX((prev) => prev.filter((v) => v.id !== vfx.id))
+          }}
+        />
+      ))}
     </group>
   )
 }

@@ -50,7 +50,7 @@ export const Assets = {
     SWORD_AND_SHIELD_SLASH_3: 'assets/Pro_Sword_and_Shield_Pack/sword_and_shield_slash_3.fbx',
     SWORD_AND_SHIELD_SLASH_4: 'assets/Pro_Sword_and_Shield_Pack/sword_and_shield_slash_4.fbx',
     // SWORD_AND_SHIELD_SLASH_5: 'assets/Pro_Sword_and_Shield_Pack/sword_and_shield_slash_5.fbx',
-    // SWORD_AND_SHIELD_SLASH: 'assets/Pro_Sword_and_Shield_Pack/sword_and_shield_slash.fbx',
+    SWORD_AND_SHIELD_SLASH: 'assets/Pro_Sword_and_Shield_Pack/sword_and_shield_slash.fbx',
     SWORD_AND_SHIELD_STRAFE_2: 'assets/Pro_Sword_and_Shield_Pack/sword_and_shield_strafe_2.fbx',
     SWORD_AND_SHIELD_STRAFE_3: 'assets/Pro_Sword_and_Shield_Pack/sword_and_shield_strafe_3.fbx',
     SWORD_AND_SHIELD_STRAFE_4: 'assets/Pro_Sword_and_Shield_Pack/sword_and_shield_strafe_4.fbx',
@@ -62,11 +62,14 @@ export const Assets = {
     SIT_TO_STAND: 'assets/Pro_Sword_and_Shield_Pack/sit_to_stand.fbx',
     STAND_TO_SIT: 'assets/Pro_Sword_and_Shield_Pack/stand_to_sit.fbx',
     SITTING_IDLE: 'assets/Pro_Sword_and_Shield_Pack/sitting_idle.fbx',
+    STANDING_MELEE_ATTACK_DOWNWARD: 'assets/Pro_Sword_and_Shield_Pack/standing_melee_attack_downward.fbx',
+    STANDING_MELEE_ATTACK_HORIZONTAL: 'assets/Pro_Sword_and_Shield_Pack/standing_melee_attack_horizontal.fbx',
   },
   CAMPFIRE: 'assets/Map/h_campfire.glb',
   CASTLE_WALL: 'assets/Map/castle_wall.glb',
   TENT: 'assets/Map/tent_modified.glb',
   WOOD_BLOCK: 'assets/Map/wood_chopping_trunk_base.glb',
+  TREE: 'assets/Map/pine_tree.glb',
 
   TEXTURE: {
     STONE_RIVER: {

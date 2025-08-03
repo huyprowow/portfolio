@@ -49,6 +49,9 @@ export default function Home() {
       { name: Controls.jump, keys: ['Space'] },
       { name: Controls.changeCamera, keys: ['KeyC'] },
       { name: Controls.changeMode, keys: ['KeyF'] },
+      { name: Controls.buff, keys: ['KeyU'] },
+      { name: Controls.attack, keys: ['KeyJ'] },
+      { name: Controls.block, keys: ['KeyK'] },
     ],
     [],
   )

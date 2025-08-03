@@ -4,13 +4,18 @@ import './Control.scss'
 import { mobileAndTabletCheck } from '@/helpers/mobileAndTabletCheck'
 import { useBoundStore } from '@/store/store'
 import { EGameMode } from '@/constant/enum'
-
+import { GiBroadsword } from 'react-icons/gi'
+import { GiSwordman } from 'react-icons/gi'
+import { GiSwordsEmblem } from 'react-icons/gi'
 const Control = () => {
   const forward = useKeyboardControls((state) => state.forward)
   const back = useKeyboardControls((state) => state.back)
   const left = useKeyboardControls((state) => state.left)
   const right = useKeyboardControls((state) => state.right)
   const jump = useKeyboardControls((state) => state.jump)
+  const attack = useKeyboardControls((state) => state.attack)
+  const buff = useKeyboardControls((state) => state.buff)
+  const block = useKeyboardControls((state) => state.block)
   const isMb = mobileAndTabletCheck()
   const gameMode = useBoundStore((state) => state.game.mode)
   const handleTouchStart = ({ eventInitDict }: { eventInitDict: { key: string; code: string } }) => {
@@ -23,10 +28,15 @@ const Control = () => {
       window.dispatchEvent(new KeyboardEvent('keyup', eventInitDict))
     }, 0)
   }
+
   return (
-      <div className='controls' style={{
-        zIndex: 9999
-      }}>
+    <div
+      className='controls'
+      style={{
+        zIndex: 9999,
+      }}
+    >
+      <div className='left-section'>
         <div className='move'>
           <div className='raw'>
             <button
@@ -112,13 +122,70 @@ const Control = () => {
         </div>
         {!isMb && (
           <div className='mode'>
-            <button className={`key round flex flex-col ${gameMode === EGameMode.Follow ? 'active' : ''}`}>
+            <button className={`key round ${gameMode === EGameMode.Follow ? 'active' : ''}`}>
               <span className='text-base relative top-1'>F</span>
               <sub className='text-xs '>{gameMode}</sub>
             </button>
           </div>
         )}
       </div>
+      <div className='skill'>
+        <div className='raw'>
+          <button
+            className={`key round ${buff ? 'active' : ''} skill-top`}
+            onTouchStart={() =>
+              handleTouchStart({
+                eventInitDict: { key: 'U', code: 'KeyU' },
+              })
+            }
+            onTouchEnd={() =>
+              handleTouchEnd({
+                eventInitDict: { key: 'U', code: 'KeyU' },
+              })
+            }
+          >
+            <GiSwordman className='text-2xl relative top-1 ' />
+            <sub className='text-xs'>U</sub>
+          </button>
+        </div>
+        <div className='raw'>
+          <button
+            className={`key round  ${attack ? 'active' : ''} skill-main`}
+            onTouchStart={() =>
+              handleTouchStart({
+                eventInitDict: { key: 'j', code: 'KeyJ' },
+              })
+            }
+            onTouchEnd={() =>
+              handleTouchEnd({
+                eventInitDict: { key: 'j', code: 'KeyJ' },
+              })
+            }
+          >
+            <GiBroadsword className='text-2xl relative top-1 ' />
+            <sub className='text-xs'>J</sub>
+          </button>
+        </div>
+        <div className='raw'>
+          <button
+            className={`key round  ${block ? 'active' : ''} skill-bottom`}
+            onTouchStart={() =>
+              handleTouchStart({
+                eventInitDict: { key: 'k', code: 'KeyK' },
+              })
+            }
+            onTouchEnd={() =>
+              handleTouchEnd({
+                eventInitDict: { key: 'k', code: 'KeyK' },
+              })
+            }
+          >
+            <GiSwordsEmblem className='text-2xl relative top-1 ' />
+            <sub className='text-xs'>K</sub>
+          </button>
+        </div>
+      </div>
+    </div>
   )
 }
 
