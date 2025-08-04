@@ -115,7 +115,7 @@ const SkillVFX: React.FC<SkillVFXProps> = ({ type, position, rotation = [0, 0, 0
       case 'block':
         return 0x44ff44 // Green
       case 'powerUp':
-        return 0x4444ff // Blue
+        return 0xffe577 // Blue
       default:
         return 0xffffff // White
     }

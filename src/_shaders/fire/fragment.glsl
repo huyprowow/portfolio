@@ -55,4 +55,6 @@ void main() {
   col.a = col.r;
   csm_DiffuseColor = col;
   // csm_DiffuseColor = vec4(1.0, 0.0, 0.0, 1.0);
+
+  #include <colorspace_fragment>
 }

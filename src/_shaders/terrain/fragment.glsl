@@ -6,7 +6,6 @@ uniform vec3 uColorTopMountain;
 uniform vec3 uColorRock;
 
 // Textures
-
 uniform sampler2D uStoneRiverARMTexture;
 uniform sampler2D uStoneRiverDiffuseTexture;
 uniform sampler2D uStoneRiverDisplacementTexture;
@@ -40,8 +39,8 @@ uniform sampler2D uTopMountainNORMALTexture;
 #include ../includes/simplexNoise2d.glsl
 
 varying vec3 vPosition;
-varying float vUpDot; // dot product with up vector to determine if the surface is facing up
-varying vec2 vUv; // bien uv tu vertex shader  
+varying float vUpDot;
+varying vec2 vUv;
 
 // Triplanar blend function
 vec3 blendFactor(vec3 normal, float sharpness) {
@@ -67,6 +66,19 @@ vec4 triplanarTexture(sampler2D tex, vec3 worldPos, vec3 normal, float tiling, f
   return x * blending.x + y * blending.y + z * blending.z;
 }
 
+// Function to decode normal from texture
+vec3 decodeNormal(vec4 normalMap) {
+  vec3 normal = normalize(normalMap.rgb * 2.0 - 1.0);
+  return normal;
+}
+
+// Function to blend PBR properties
+vec4 blendPBRProperties(vec4 baseColor, vec4 arm, vec3 normal, float blendFactor) {
+  // ARM texture contains: R = AO, G = Roughness, B = Metallic
+  vec4 blendedColor = mix(baseColor, arm, blendFactor);
+  return blendedColor;
+}
+
 void main() {
   float sharpness = 10.0;
 
@@ -76,42 +88,113 @@ void main() {
   float rockTiling = 0.5, rockTileSize = 1.0;
   float topMountainTiling = 0.5, topMountainTileSize = 1.0;
 
+  // Sample all textures with triplanar mapping
   vec4 textureStoneRiverDiffuse = triplanarTexture(uStoneRiverDiffuseTexture, vPosition, normalize(vNormal), bottomWaterTiling, bottomWaterTileSize, sharpness);
+  vec4 textureStoneRiverARM = triplanarTexture(uStoneRiverARMTexture, vPosition, normalize(vNormal), bottomWaterTiling, bottomWaterTileSize, sharpness);
+  vec4 textureStoneRiverNormal = triplanarTexture(uStoneRiverNORMALTexture, vPosition, normalize(vNormal), bottomWaterTiling, bottomWaterTileSize, sharpness);
+
   vec4 textureRockMossyDiffuse = triplanarTexture(uRockMossyDiffuseTexture, vPosition, normalize(vNormal), bottomWaterTiling, bottomWaterTileSize, sharpness);
-  // vec4 textureStoneRiverDiffuse = texture2D(uStoneRiverDiffuseTexture, vUv);
-  // vec4 textureAlluvialSoilDiffuse = triplanarTexture(uAlluvialSoilDiffuseTexture, vPosition, normalize(vNormal), sandTiling, sandTileSize, sharpness);
+  vec4 textureRockMossyARM = triplanarTexture(uRockMossyARMTexture, vPosition, normalize(vNormal), bottomWaterTiling, bottomWaterTileSize, sharpness);
+  vec4 textureRockMossyNormal = triplanarTexture(uRockMossyNORMALTexture, vPosition, normalize(vNormal), bottomWaterTiling, bottomWaterTileSize, sharpness);
+
   vec4 texturePebbleGroundDiffuse = triplanarTexture(uPebbleGroundDiffuseTexture, vPosition, normalize(vNormal), groundTiling, groundTileSize, sharpness);
+  vec4 texturePebbleGroundARM = triplanarTexture(uPebbleGroundARMTexture, vPosition, normalize(vNormal), groundTiling, groundTileSize, sharpness);
+  vec4 texturePebbleGroundNormal = triplanarTexture(uPebbleGroundNORMALTexture, vPosition, normalize(vNormal), groundTiling, groundTileSize, sharpness);
+
   vec4 textureRockWallDiffuse = triplanarTexture(uRockWallDiffuseTexture, vPosition, normalize(vNormal), rockTiling, rockTileSize, sharpness);
+  vec4 textureRockWallARM = triplanarTexture(uRockWallARMTexture, vPosition, normalize(vNormal), rockTiling, rockTileSize, sharpness);
+  vec4 textureRockWallNormal = triplanarTexture(uRockWallNORMALTexture, vPosition, normalize(vNormal), rockTiling, rockTileSize, sharpness);
+
   vec4 textureTopMountainDiffuse = triplanarTexture(uTopMountainDiffuseTexture, vPosition, normalize(vNormal), topMountainTiling, topMountainTileSize, sharpness);
+  vec4 textureTopMountainARM = triplanarTexture(uTopMountainARMTexture, vPosition, normalize(vNormal), topMountainTiling, topMountainTileSize, sharpness);
+  vec4 textureTopMountainNormal = triplanarTexture(uTopMountainNORMALTexture, vPosition, normalize(vNormal), topMountainTiling, topMountainTileSize, sharpness);
 
-  vec3 color = vec3(1.0); // green color for terrain
+  // Initialize PBR properties
+  vec3 finalColor = vec3(1.0);
+  float finalRoughness = 0.5;
+  float finalMetallic = 0.0;
+  float finalAO = 1.0;
+  vec3 finalNormal = normalize(vNormal);
+  vec3 finalBump = vec3(0.0);
 
-  //Color
-  float surfaceWaterMix = smoothstep(-1.0, -0.9 , vPosition.y);
-  color = mix(textureStoneRiverDiffuse.rgb, textureRockMossyDiffuse.rgb, surfaceWaterMix);
-
-  // sand
+  // Blend based on height and slope
+  float surfaceWaterMix = smoothstep(-1.0, -0.9, vPosition.y);
   // float sandMix = step(-0.1, vPosition.y);
-  // color = mix(color, textureAlluvialSoilDiffuse.rgb, sandMix);
-
-  // grass/GROUND
-
   float groundMix = step(-0.06, vPosition.y);
-  color = mix(color, texturePebbleGroundDiffuse.rgb, groundMix);
-
-  // rock
-  //k muon rock ben noai topMountain nen dat no o trc topMountain
   float rockMix = vUpDot;
   rockMix = 1.0 - step(0.8, rockMix); // rock only on steep slopes
   rockMix *= step(-0.06, vPosition.y); // rock only above a certain height
-  color = mix(color, textureRockWallDiffuse.rgb, rockMix);
 
-  // topMountain
-  // float topMountainThreshold = 0.45; // threshold for topMountain
-  // topMountainThreshold += simplexNoise2d(vPosition.xz * 15.0) * 0.1; // add some noise to the threshold
+  // grass/GROUND
+
+  // Water/River areas (lowest elevation)
+  if (surfaceWaterMix > 0.0) {
+    finalColor = mix(textureStoneRiverDiffuse.rgb, textureRockMossyDiffuse.rgb, surfaceWaterMix);
+    finalRoughness = mix(textureStoneRiverARM.g, textureRockMossyARM.g, surfaceWaterMix);
+    finalMetallic = mix(textureStoneRiverARM.b, textureRockMossyARM.b, surfaceWaterMix);
+    finalAO = mix(textureStoneRiverARM.r, textureRockMossyARM.r, surfaceWaterMix);
+
+      // Blend bump/normal
+    vec3 stoneRiverBump = decodeNormal(textureStoneRiverNormal);
+    vec3 rockMossyBump = decodeNormal(textureRockMossyNormal);
+    finalBump = mix(stoneRiverBump, rockMossyBump, surfaceWaterMix);
+  }
+
+  // sand
+  // if (sandMix > 0.0) {
+  //   finalColor = mix(finalColor, textureAlluvialSoilDiffuse.rgb, sandMix);
+  //   finalRoughness = mix(finalRoughness, textureAlluvialSoilARM.g, sandMix);
+  //   finalMetallic = mix(finalMetallic, textureAlluvialSoilARM.b, sandMix);
+  //   finalAO = mix(finalAO, textureAlluvialSoilARM.r, sandMix);
+
+  // }
+
+  // Ground areas (middle elevation)
+  if (groundMix > 0.0) {
+    finalColor = mix(finalColor, texturePebbleGroundDiffuse.rgb, groundMix);
+    finalRoughness = mix(finalRoughness, texturePebbleGroundARM.g, groundMix);
+    finalMetallic = mix(finalMetallic, texturePebbleGroundARM.b, groundMix);
+    finalAO = mix(finalAO, texturePebbleGroundARM.r, groundMix);
+
+    // Blend bump/normal
+    vec3 pebbleGroundBump = decodeNormal(texturePebbleGroundNormal);
+    finalBump = mix(finalBump, pebbleGroundBump, groundMix);
+  }
+
+  // Rock areas (steep slopes)
+  if (rockMix > 0.0) {
+    finalColor = mix(finalColor, textureRockWallDiffuse.rgb, rockMix);
+    finalRoughness = mix(finalRoughness, textureRockWallARM.g, rockMix);
+    finalMetallic = mix(finalMetallic, textureRockWallARM.b, rockMix);
+    finalAO = mix(finalAO, textureRockWallARM.r, rockMix);
+
+        // Blend bump/normal
+    vec3 rockWallBump = decodeNormal(textureRockWallNormal);
+    finalBump = mix(finalBump, rockWallBump, rockMix);
+  }
+
+  // Top mountain areas (highest elevation) - uncomment if needed
+  // float topMountainThreshold = 0.45;
+  // topMountainThreshold += simplexNoise2d(vPosition.xz * 15.0) * 0.1;
   // float topMountainMix = step(topMountainThreshold, vPosition.y);
-  // color = mix(color, textureTopMountainDiffuse.rgb, topMountainMix);
+  // if (topMountainMix > 0.0) {
+  //   finalColor = mix(finalColor, textureTopMountainDiffuse.rgb, topMountainMix);
+  //   finalRoughness = mix(finalRoughness, textureTopMountainARM.g, topMountainMix);
+  //   finalMetallic = mix(finalMetallic, textureTopMountainARM.b, topMountainMix);
+  //   finalAO = mix(finalAO, textureTopMountainARM.r, topMountainMix);
+  //   
+  //   vec3 topMountainBump = decodeNormal(textureTopMountainNormal);
+  //   finalBump = mix(finalBump, topMountainBump, topMountainMix);
+  // }
 
-  //Final color
-  csm_DiffuseColor = vec4(color, 1.0);
+  // Apply PBR properties to the material
+  csm_DiffuseColor = vec4(finalColor, 1.0);
+  csm_Roughness = finalRoughness;
+  csm_Metalness = finalMetallic;
+  csm_Bump = finalBump; // Use csm_Bump for normal mapping
+  csm_DiffuseColor.rgb *= finalAO;
+  // csm_AO = finalAO;
+
+  #include <colorspace_fragment>
+
 }

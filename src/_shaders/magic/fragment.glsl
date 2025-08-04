@@ -24,4 +24,5 @@ void main() {
   vec3 color = mix(uColor, uColor * 1.5, pulse);
 
   csm_FragColor = vec4(color, alpha);
+   #include <colorspace_fragment>
 }

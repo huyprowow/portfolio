@@ -44,7 +44,7 @@
     },
     "fadeInAnimationTime": 0.1,
     "fadeOutAnimationTime": 0.1,
-    "normalSpeed": 13
+    "normalSpeed": 20
   },
   "collision": {
     "halfHeight": 4,

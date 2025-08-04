@@ -16,4 +16,5 @@ void main() {
   color = mix(color, texture2D(textures[1], vCloudUV).rgb, 0.4);
 
   csm_DiffuseColor = vec4(color, 1.0);
+   #include <colorspace_fragment>
 }

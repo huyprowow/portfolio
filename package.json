@@ -22,6 +22,7 @@
     "@react-three/rapier": "^1.1.1",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "framer-motion": "^12.23.12",
     "glsl-random": "^0.0.5",
     "its-fine": "^1.1.1",
     "leva": "^0.10.0",

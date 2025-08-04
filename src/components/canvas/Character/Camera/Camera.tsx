@@ -341,12 +341,14 @@ const Camera = ({ player }: CameraProps) => {
         //   15,
         //   -25, // Adjusted for better view
         // ]}
+
       >
         {/* <PointerLockControls
         addEventListener={undefined}
         hasEventListener={undefined}
         removeEventListener={undefined}
         dispatchEvent={undefined}
+        
         /> */}
       </PerspectiveCamera>
     </>

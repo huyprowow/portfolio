@@ -11,7 +11,7 @@ import { useBoundStore } from '@/store/store'
 import { useControls } from 'leva'
 const PLANE_SIZE = 10
 // const BLADE_COUNT = 1000 //000
-const INSTANCES_LIMIT = 10000 * 1000 //* 2000
+// const INSTANCES_LIMIT = 10000 * 1000 //* 2000
 
 // single patch instanced
 // const BLADES_PER_PATCH = 20
@@ -27,6 +27,12 @@ const levaConfig = {
     step: 0.1,
     value: 1.0,
   },
+  instancesLimit: {
+    min: 1000,
+    max: 30000000,
+    step: 100,
+    value: 10000000,
+  },
 }
 interface GrassProps {
   getElevation: (position: [number, number], uniforms: any, time: number) => number
@@ -36,7 +42,7 @@ interface GrassProps {
 const Grass = ({ getElevation, terrainUniforms, scaleMap }: GrassProps) => {
   const grassRef = useRef<THREE.InstancedMesh>(null)
   const playerRef = useBoundStore((state) => state.playerRef)
-  const { uWindStrength } = useControls('Grass', levaConfig)
+  const { uWindStrength, instancesLimit } = useControls('Grass', levaConfig)
 
   useEffect(() => {
     if (!playerRef) return
@@ -191,7 +197,7 @@ const Grass = ({ getElevation, terrainUniforms, scaleMap }: GrassProps) => {
     let validInstanceCount = 0
 
     // Generate completely random positions instead of grid
-    for (let i = 0; i < INSTANCES_LIMIT; i++) {
+    for (let i = 0; i < instancesLimit; i++) {
       // Random position within the map area
       const x = (Math.random() - 0.5) * mapSize
       const z = (Math.random() - 0.5) * mapSize
@@ -227,7 +233,7 @@ const Grass = ({ getElevation, terrainUniforms, scaleMap }: GrassProps) => {
     }
 
     console.log(`Rendered ${validInstanceCount} grass instances`)
-  }, [INSTANCES_LIMIT, scaleMap])
+  }, [instancesLimit, scaleMap])
 
   const generateGeometry = () => {
     const geometry = new THREE.BufferGeometry()
@@ -351,7 +357,7 @@ const Grass = ({ getElevation, terrainUniforms, scaleMap }: GrassProps) => {
       </instancedMesh> */}
       <instancedMesh
         ref={grassRef}
-        args={[geom, grassMaterial, INSTANCES_LIMIT]}
+        args={[geom, grassMaterial, instancesLimit]}
         castShadow
         receiveShadow
         //   // position={[

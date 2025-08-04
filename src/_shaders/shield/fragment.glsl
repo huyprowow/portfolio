@@ -34,12 +34,14 @@ void main() {
   float alpha = uIntensity;
   // Test từng effect một
   // alpha *= ripple; // Uncomment để test ripple
-  // alpha *= noise;   // Uncomment để test noise  
+  alpha *= noise;   // Uncomment để test noise  
   // alpha *= edge;    // Uncomment để test edge
-  // alpha *= centerGlow; // Uncomment để test centerGlow
+  alpha *= centerGlow; // Uncomment để test centerGlow
   // alpha *= hexMask; // Uncomment để test hexMask
 
   vec3 color = uColor * (1.0  * 0.5);
 
   csm_DiffuseColor = vec4(color, alpha);
+
+   #include <colorspace_fragment>
 }

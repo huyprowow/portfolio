@@ -8,7 +8,6 @@ varying vec3 vPosition;
 varying float vUpDot;
 varying vec2 vUv;
 
-
 #include ../includes/simplexNoise2d.glsl
 
 float getElevation(vec2 position) {

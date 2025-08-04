@@ -252,7 +252,16 @@ const Terrain = () => {
 
   return (
     <>
-      <Tree getElevation={getElevation} />
+      <Tree
+        getElevation={getElevation}
+        terrainUniforms={{
+          uPositionFrequency,
+          uStrength,
+          uWarpFrequency,
+          uWarpStrength,
+        }}
+        scaleMap={scaleMap}
+      />
       <Grass
         getElevation={getElevation}
         terrainUniforms={{

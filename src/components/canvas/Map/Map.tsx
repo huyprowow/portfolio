@@ -11,7 +11,7 @@ const Map = () => {
     <>
       <Terrain />
       {/* <Sea /> */}
-      <Water />
+      {/* <Water /> */}
       <Campfire />
       <Tent />
       <WoodBlock />

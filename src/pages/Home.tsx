@@ -6,7 +6,7 @@ import { SceneView, SceneCommon } from '../components/canvas/View'
 import { useDebugMode } from '../hooks/useDebugMode'
 import { Controls } from '../helpers/constants'
 import { KeyboardControls, KeyboardControlsEntry } from '@react-three/drei'
-import { useEffect, useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Perf } from 'r3f-perf'
 import { DebugUI } from '../components/canvas/Debug/DebugUI'
 import { useControls } from 'leva'
@@ -16,6 +16,7 @@ import Map from '@/components/canvas/Map/Map'
 import dfGameSetting from '@/settings/df_game_setting.json'
 import useAudio from '@/hooks/useAudio'
 import Tutorial from '@/components/dom/Tutorial'
+import LoadingScreen from '@/components/dom/LoadingScreen'
 const startDebug = () => {
   const hash = window.location.hash
   if (!hash) {
@@ -27,7 +28,7 @@ export default function Home() {
   const loading = useLoadingAssets()
   const visible = usePageVisible()
   const isDebugMode = useDebugMode()
-
+  const [showContent, setShowContent] = useState(true)
   const [{ orbit }, setOrbit] = useControls('Camera', () => ({
     orbit: false,
   }))
@@ -65,30 +66,38 @@ export default function Home() {
     currentBgm.value.volume = dfGameSetting.audio.bgm.default.volume
     currentBgm.value.play()
   }, [bgm])
-
+  const handleLoadingComplete = () => {
+    setShowContent(true)
+  }
   return (
     <>
-      <DebugUI />
-      <KeyboardControls map={map}>
-        <Tutorial />
-        <UI />
-        <SceneView className='relative h-full sm:w-full' orbit={orbit}>
-          <SceneCommon color='#000000' />
-          <Sky />
-          <Physics debug={isDebugMode} gravity={[0, -9.8, 0]} timeStep='vary' paused={!visible || loading}>
-            <Map />
-            <Character orbit={orbit} />
-            {isDebugMode && (
-              <>
-                <Perf position='top-left' />
-                <GizmoHelper alignment='bottom-right' margin={[80, 80]}>
-                  <GizmoViewport axisColors={['red', 'green', 'blue']} labelColor='black' />
-                </GizmoHelper>
-              </>
-            )}
-          </Physics>
-        </SceneView>
-      </KeyboardControls>
+      <LoadingScreen onComplete={handleLoadingComplete} />
+
+      {showContent && (
+        <>
+          <DebugUI />
+          <KeyboardControls map={map}>
+            <Tutorial />
+            <UI />
+            <SceneView className='relative h-full sm:w-full' orbit={orbit}>
+              <SceneCommon color='#000000' />
+              <Sky />
+              <Physics debug={isDebugMode} gravity={[0, -9.8, 0]} timeStep='vary' paused={!visible || loading}>
+                <Map />
+                <Character orbit={orbit} />
+                {isDebugMode && (
+                  <>
+                    <Perf position='top-left' />
+                    <GizmoHelper alignment='bottom-right' margin={[80, 80]}>
+                      <GizmoViewport axisColors={['red', 'green', 'blue']} labelColor='black' />
+                    </GizmoHelper>
+                  </>
+                )}
+              </Physics>
+            </SceneView>
+          </KeyboardControls>
+        </>
+      )}
     </>
   )
 }

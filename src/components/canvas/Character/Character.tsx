@@ -140,26 +140,26 @@ const Character: React.FC<CharacterProps> = (props) => {
       const shieldDistance = 7.0 // Khoảng cách từ character
       const frontPosition: [number, number, number] = [
         pos.x + characterForward.x * shieldDistance,
-        pos.y + characterSetting.collision.halfHeight + characterSetting.collision.radius,
+        pos.y + characterSetting.collision.halfHeight + characterSetting.collision.radius + 3,
         pos.z + characterForward.z * shieldDistance,
       ]
 
       let shieldRotation = [0, Math.atan2(characterForward.x, characterForward.z), 0]
-      
+
       const angle = Math.atan2(characterForward.x, characterForward.z)
       // Tính tilt dựa trên góc
-      if (angle > -Math.PI / 4 && angle < Math.PI / 4) {
+      if (angle > -Math.PI / 5 && angle < Math.PI / 5) {
         // Nhìn về phía trước
-        shieldRotation[0] = -Math.PI / 4
-      } else if (angle > Math.PI / 4 && angle < (3 * Math.PI) / 4) {
+        shieldRotation[0] = -Math.PI / 5
+      } else if (angle > Math.PI / 5 && angle < (3 * Math.PI) / 5) {
         // Nhìn sang phải
-        shieldRotation[2] = -Math.PI / 4
-      } else if (angle > (3 * Math.PI) / 4 || angle < (-3 * Math.PI) / 4) {
+        shieldRotation[2] = -Math.PI / 5
+      } else if (angle > (3 * Math.PI) / 5 || angle < (-3 * Math.PI) / 5) {
         // Nhìn về phía sau
-        shieldRotation[0] = Math.PI / 4
+        shieldRotation[0] = Math.PI / 5
       } else {
         // Nhìn sang trái
-        shieldRotation[2] = Math.PI / 4
+        shieldRotation[2] = Math.PI / 5
       }
 
       setActiveVFX((prev) => [
