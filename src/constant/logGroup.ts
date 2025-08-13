@@ -1,0 +1,13 @@
+export const LOG_GROUP = {
+  CHARACTER: 'CHARACTER',
+  CAMERA: 'CAMERA',
+  NPC: 'NPC',
+  MAP: 'MAP',
+  UI: 'UI',
+  VFX: 'VFX',
+  AUDIO: 'AUDIO',
+  CONTROL: 'CONTROL',
+  GAME: 'GAME',
+  ANIMATION: 'ANIMATION',
+  UTILS: 'UTILS',
+}

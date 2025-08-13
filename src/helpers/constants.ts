@@ -12,4 +12,5 @@ export enum Controls {
   block = 'block',
   attack = 'attack',
   buff = 'buff',
+  interact = 'interact',
 }

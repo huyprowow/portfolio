@@ -7,6 +7,8 @@ import { EGameMode } from '@/constant/enum'
 import { GiBroadsword } from 'react-icons/gi'
 import { GiSwordman } from 'react-icons/gi'
 import { GiSwordsEmblem } from 'react-icons/gi'
+import { logToGroup } from '@/helpers/logToGroup'
+import { LOG_GROUP } from '@/constant/logGroup'
 const Control = () => {
   const forward = useKeyboardControls((state) => state.forward)
   const back = useKeyboardControls((state) => state.back)
@@ -16,14 +18,16 @@ const Control = () => {
   const attack = useKeyboardControls((state) => state.attack)
   const buff = useKeyboardControls((state) => state.buff)
   const block = useKeyboardControls((state) => state.block)
+  const interact = useKeyboardControls((state) => state.interact)
   const isMb = mobileAndTabletCheck()
   const gameMode = useBoundStore((state) => state.game.mode)
+  const interacting = useBoundStore((state) => state.interacting)
   const handleTouchStart = ({ eventInitDict }: { eventInitDict: { key: string; code: string } }) => {
-    console.log('start touch')
+    logToGroup(LOG_GROUP.CONTROL, 'start touch')
     window.dispatchEvent(new KeyboardEvent('keydown', eventInitDict))
   }
   const handleTouchEnd = ({ eventInitDict }: { eventInitDict: { key: string; code: string } }) => {
-    console.log('end touch')
+    logToGroup(LOG_GROUP.CONTROL, 'end touch')
     setTimeout(() => {
       window.dispatchEvent(new KeyboardEvent('keyup', eventInitDict))
     }, 0)
@@ -120,8 +124,29 @@ const Control = () => {
             </button>
           </div>
         </div>
+
         {!isMb && (
           <div className='mode'>
+            {interacting && (
+              <button className={`key round ${interact ? 'active' : ''}`}>
+                <span
+                  className='text-base relative top-1'
+                  onTouchStart={() =>
+                    handleTouchStart({
+                      eventInitDict: { key: 'x', code: 'KeyX' },
+                    })
+                  }
+                  onTouchEnd={() =>
+                    handleTouchEnd({
+                      eventInitDict: { key: 'x', code: 'KeyX' },
+                    })
+                  }
+                >
+                  X
+                </span>
+                <sub className='text-xs '>interact</sub>
+              </button>
+            )}
             <button className={`key round ${gameMode === EGameMode.Follow ? 'active' : ''}`}>
               <span className='text-base relative top-1'>F</span>
               <sub className='text-xs '>{gameMode}</sub>

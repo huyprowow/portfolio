@@ -7,6 +7,8 @@ import magicFragmentShader from '@/_shaders/magic/fragment.glsl'
 import shieldVertexShader from '@/_shaders/shield/vertex.glsl'
 import shieldFragmentShader from '@/_shaders/shield/fragment.glsl'
 import { Assets } from '@/helpers/assetMap'
+import { logToGroup } from '@/helpers/logToGroup'
+import { LOG_GROUP } from '@/constant/logGroup'
 
 interface SkillVFXProps {
   type: 'attack' | 'block' | 'powerUp'
@@ -22,7 +24,7 @@ const SkillVFX: React.FC<SkillVFXProps> = ({ type, position, rotation = [0, 0, 0
   const isActive = useRef(true)
   // Add debug logging
   useEffect(() => {
-    console.log(`SkillVFX created: ${type} at position:`, position)
+    logToGroup(LOG_GROUP.VFX, `SkillVFX created: ${type} at position:`, position)
   }, [type, position])
 
   const createShieldGeometry = () => {
@@ -127,7 +129,7 @@ const SkillVFX: React.FC<SkillVFXProps> = ({ type, position, rotation = [0, 0, 0
     // Set start time on first frame
     if (startTime.current === 0) {
       startTime.current = state.clock.getElapsedTime()
-      console.log(`SkillVFX started: ${type}`)
+      logToGroup(LOG_GROUP.VFX, `SkillVFX started: ${type}`)
     }
 
     const elapsed = state.clock.getElapsedTime()

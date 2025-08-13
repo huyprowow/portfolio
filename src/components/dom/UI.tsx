@@ -5,12 +5,13 @@ import { useBoundStore } from '@/store/store'
 import { useKeyboardControls } from '@react-three/drei'
 import { EGameMode } from '@/constant/enum'
 import { SettingDialog } from './GameUI/Setting/SettingDialog'
-
+import Logger from '@/helpers/Logger'
 const UI = () => {
   const gameMode = useBoundStore((state) => state.game.mode)
   const setGameMode = useBoundStore((state) => state.setGameMode)
   const [subscribeKeys, getKeys] = useKeyboardControls()
   const changeMode = getKeys().changeMode
+
   useEffect(() => {
     // Subscribe to changeMode key
     const unsubscribe = subscribeKeys(
@@ -37,9 +38,10 @@ const UI = () => {
       }}
     >
       <Control />
-      <SettingDialog >
+      <SettingDialog>
         <Setting />
       </SettingDialog>
+      {import.meta.env.VITE_LOG_CONSOLE === 'true' ? <Logger /> : null}
     </div>
   )
 }

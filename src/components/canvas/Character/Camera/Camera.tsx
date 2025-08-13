@@ -14,6 +14,8 @@ import useSetting from '@/hooks/useSetting'
 import { useDebugMode } from '@/hooks/useDebugMode'
 import characterSetting from '@/settings/df_character_setting.json'
 import mapSetting from '@/settings/df_map_setting.json'
+import { logToGroup } from '@/helpers/logToGroup'
+import { LOG_GROUP } from '@/constant/logGroup'
 
 interface CameraProps {
   player: React.RefObject<RapierRigidBody>
@@ -143,12 +145,12 @@ const Camera = ({ player }: CameraProps) => {
     const onPointerLockChange = () => {
       if (document.pointerLockElement !== document.body) {
         // Pointer lock is lost!
-        console.log('Pointer lock lost')
+        logToGroup(LOG_GROUP.CAMERA, 'Pointer lock lost')
         setGameMode(EGameMode.Normal)
         // You can set a state here to show a "Click to resume" overlay, pause the game, etc.
       } else {
         // Pointer lock is active
-        console.log('Pointer lock active')
+        logToGroup(LOG_GROUP.CAMERA, 'Pointer lock active')
       }
     }
 
@@ -170,7 +172,7 @@ const Camera = ({ player }: CameraProps) => {
         const next = prev + e.movementY * mouseSensitivity.pitch //invert y movement
         return Math.max(minPitch, Math.min(maxPitch, next))
       })
-      // console.log({
+      // logToGroup(LOG_GROUP.CAMERA, {
       //   yaw,
       //   pitch,
       //   movementX: e.movementX,
@@ -264,7 +266,7 @@ const Camera = ({ player }: CameraProps) => {
   //logic for camera follow player
   const followCamera = useCallback(
     (delta: number) => {
-      // console.log('followCamera')
+      // logToGroup(LOG_GROUP.CAMERA, 'followCamera')
       if (!player.current) return
       const playerPosition = player.current.translation()
 
@@ -281,7 +283,7 @@ const Camera = ({ player }: CameraProps) => {
       const minY = terrainY + 0.01
       const maxY = ceilingY - 0.01
 
-      // console.log({
+      // logToGroup(LOG_GROUP.CAMERA, {
       //   ceilingY,
       //   terrainY,
       //   y,
@@ -298,7 +300,7 @@ const Camera = ({ player }: CameraProps) => {
       cameraTarget.copy(playerPosition)
       cameraTarget.y += height
 
-      // console.log({
+      // logToGroup(LOG_GROUP.CAMERA, {
       //   playerPosition,
       //   cameraPosition,
       //   cameraTarget,

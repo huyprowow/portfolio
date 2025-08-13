@@ -30,8 +30,10 @@ import characterSetting from '@/settings/df_character_setting.json'
 import { mobileAndTabletCheck } from '@/helpers/mobileAndTabletCheck'
 import { EGameMode } from '@/constant/enum'
 import SkillVFX from '../VFX/SkillVFX'
+import { logToGroup } from '@/helpers/logToGroup'
+import { LOG_GROUP } from '@/constant/logGroup'
 
-console.log(characterSetting)
+logToGroup(LOG_GROUP.CHARACTER, { characterSetting })
 interface CharacterProps {
   // Add any props if needed
   orbit: boolean
@@ -78,12 +80,13 @@ const Character: React.FC<CharacterProps> = (props) => {
     }
   }, [nodes, setCharacter])
 
+  // VFX Skill
   const playSkillAnimation = (
     skillName: string,
     timeoutRef: React.MutableRefObject<NodeJS.Timeout | null>,
     onComplete?: () => void,
   ) => {
-    console.log(`skill${skillName}Character`)
+    logToGroup(LOG_GROUP.CHARACTER, `skill${skillName}Character`)
 
     const action = actionMap.get(characterSetting.animation[skillName].name)
     if (action) {
@@ -317,7 +320,7 @@ const Character: React.FC<CharacterProps> = (props) => {
 
     if (!player.current) return
 
-    console.log('jumpCharacter')
+    logToGroup(LOG_GROUP.CHARACTER, 'jumpCharacter')
 
     // nodes.children[1].material.transparent = true
     nodes.children[3].material.opacity = 0.5
@@ -339,7 +342,7 @@ const Character: React.FC<CharacterProps> = (props) => {
 
     if (isDebugMode) {
       // Add debug logging
-      console.log('Ray cast details:', {
+      logToGroup(LOG_GROUP.CHARACTER, 'Ray cast details:', {
         origin: originRayPosition,
         direction: directionRayCast,
         hit: hit,
@@ -429,7 +432,7 @@ const Character: React.FC<CharacterProps> = (props) => {
   const gameMode = useBoundStore((state) => state.game.mode)
 
   const resetGame = () => {
-    console.log('resetGame')
+    logToGroup(LOG_GROUP.CHARACTER, 'resetGame')
     player.current?.setTranslation(
       {
         x: characterSetting.startPosition.x,

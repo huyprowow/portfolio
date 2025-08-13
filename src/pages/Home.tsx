@@ -17,6 +17,9 @@ import dfGameSetting from '@/settings/df_game_setting.json'
 import useAudio from '@/hooks/useAudio'
 import Tutorial from '@/components/dom/Tutorial'
 import LoadingScreen from '@/components/dom/LoadingScreen'
+import Slime from '@/components/canvas/NPC/Slime'
+import { LOG_GROUP } from '@/constant/logGroup'
+import { logToGroup } from '@/helpers/logToGroup'
 const startDebug = () => {
   const hash = window.location.hash
   if (!hash) {
@@ -34,7 +37,7 @@ export default function Home() {
   }))
 
   useEffect(() => {
-    console.log(import.meta.env.VITE_DEBUG_MODE)
+    logToGroup(LOG_GROUP.UTILS, import.meta.env.VITE_DEBUG_MODE)
 
     if (import.meta.env.VITE_DEBUG_MODE === 'true' && !isDebugMode) {
       startDebug()
@@ -53,6 +56,7 @@ export default function Home() {
       { name: Controls.buff, keys: ['KeyU'] },
       { name: Controls.attack, keys: ['KeyJ'] },
       { name: Controls.block, keys: ['KeyK'] },
+      { name: Controls.interact, keys: ['KeyX'] },
     ],
     [],
   )
@@ -85,6 +89,7 @@ export default function Home() {
               <Physics debug={isDebugMode} gravity={[0, -9.8, 0]} timeStep='vary' paused={!visible || loading}>
                 <Map />
                 <Character orbit={orbit} />
+                <Slime />
                 {isDebugMode && (
                   <>
                     <Perf position='top-left' />

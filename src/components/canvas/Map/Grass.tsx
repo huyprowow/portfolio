@@ -9,6 +9,8 @@ import { Instance, Instances } from '@react-three/drei'
 import CustomShaderMaterialVanilla from 'three-custom-shader-material/vanilla'
 import { useBoundStore } from '@/store/store'
 import { useControls } from 'leva'
+import { logToGroup } from '@/helpers/logToGroup'
+import { LOG_GROUP } from '@/constant/logGroup'
 const PLANE_SIZE = 10
 // const BLADE_COUNT = 1000 //000
 // const INSTANCES_LIMIT = 10000 * 1000 //* 2000
@@ -52,7 +54,7 @@ const Grass = ({ getElevation, terrainUniforms, scaleMap }: GrassProps) => {
       playerRef.current?.translation().y,
       playerRef.current?.translation().z,
     )
-    // console.log('__playerPos', playerPos)
+    // logToGroup(LOG_GROUP.MAP, '__playerPos', playerPos)
   }, [playerRef])
 
   // useEffect(() => {
@@ -232,7 +234,7 @@ const Grass = ({ getElevation, terrainUniforms, scaleMap }: GrassProps) => {
       validInstanceCount++
     }
 
-    console.log(`Rendered ${validInstanceCount} grass instances`)
+    logToGroup(LOG_GROUP.MAP, `Rendered ${validInstanceCount} grass instances`)
   }, [instancesLimit, scaleMap])
 
   const generateGeometry = () => {
@@ -301,7 +303,7 @@ const Grass = ({ getElevation, terrainUniforms, scaleMap }: GrassProps) => {
   })
 
   const grassMaterial = useMemo(() => {
-    console.log('grassUniforms.current', grassUniforms.current)
+    logToGroup(LOG_GROUP.MAP, 'grassUniforms.current', grassUniforms.current)
     const gm = new CustomShaderMaterialVanilla({
       //CSM
       vertexShader: grassVertexShader,
@@ -345,7 +347,7 @@ const Grass = ({ getElevation, terrainUniforms, scaleMap }: GrassProps) => {
         grassRef.current.dispose()
       }
 
-      console.log('Grass component disposed')
+      logToGroup(LOG_GROUP.MAP, 'Grass component disposed')
     }
   }, [geom, grassMaterial, grassTexture])
 

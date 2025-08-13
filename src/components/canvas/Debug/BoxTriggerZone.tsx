@@ -3,6 +3,7 @@ import { useEffect, useRef } from 'react'
 import { useFrame } from '@react-three/fiber'
 import { RapierRigidBody } from '@react-three/rapier'
 import { useDebugMode } from '@/hooks/useDebugMode'
+import { ETriggerMode } from '@/constant/enum'
 
 type Props = {
   size: [number, number, number]
@@ -12,9 +13,10 @@ type Props = {
   onExit?: () => void
   debug?: boolean
   color?: string
+  mode?: ETriggerMode
 }
 
-export const BoxTriggerZone = ({ size, center, playerRef, onEnter, onExit, debug = false, color = 'blue' }: Props) => {
+export const BoxTriggerZone = ({ size, center, playerRef, onEnter, onExit, debug = false, color = 'blue',mode=ETriggerMode._3D}: Props) => {
   const wasInside = useRef(false)
   const box = useRef(new THREE.Box3())
   const isDebugMode = useDebugMode()
@@ -36,8 +38,14 @@ export const BoxTriggerZone = ({ size, center, playerRef, onEnter, onExit, debug
       playerRef.current.translation().z,
     )
 
-    const isInside = box.current.containsPoint(playerPos)
-
+    let isInside = false
+    if (mode === ETriggerMode.XZ) {
+      const min = box.current.min
+      const max = box.current.max
+      isInside = playerPos.x >= min.x && playerPos.x <= max.x && playerPos.z >= min.z && playerPos.z <= max.z
+    } else {
+      isInside = box.current.containsPoint(playerPos)
+    }
     if (!wasInside.current && isInside) {
       wasInside.current = true
       onEnter?.()

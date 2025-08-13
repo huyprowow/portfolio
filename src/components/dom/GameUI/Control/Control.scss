@@ -43,8 +43,8 @@
   }
   .mode {
     display: flex;
-    justify-content: bottom;
-    align-items: flex-end;
+    flex-direction: column;
+    justify-content: end;
     margin-bottom: 10px;
     .key {
       display: flex;

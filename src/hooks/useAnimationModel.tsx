@@ -9,6 +9,8 @@ import { FBXLoader } from 'three-stdlib'
 import characterSetting from '@/settings/df_character_setting.json'
 import * as THREE from 'three'
 import usePrevious from './usePrevious'
+import { logToGroup } from '@/helpers/logToGroup'
+import { LOG_GROUP } from '@/constant/logGroup'
 
 interface IProps {
   player: any
@@ -55,7 +57,7 @@ export const useAnimationModel = ({ player }: IProps) => {
   })
   useEffect(() => {
     if (debugAnimation) {
-      console.log('actionMap:', actionMap)
+      logToGroup(LOG_GROUP.ANIMATION, 'actionMap:', actionMap)
       const action = actionMap.get(animationDebugValue)
       if (action) {
         setCurrentAction(animationDebugValue)
@@ -75,12 +77,11 @@ export const useAnimationModel = ({ player }: IProps) => {
       let loopMode: THREE.AnimationActionLoopStyles = THREE.LoopRepeat
       if (currentAction === characterSetting.animation.jump.name) {
         loopMode = THREE.LoopOnce
-        
       }
       playAction(action, loopMode)
     }
     //get previous state
-    // console.log({
+    //  logToGroup(LOG_GROUP.ANIMATION, {
     //   currentAction,
     //   previousAction,
     // })

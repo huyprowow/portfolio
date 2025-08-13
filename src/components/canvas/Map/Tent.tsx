@@ -8,21 +8,19 @@ import { toInteractionGroups } from '@/helpers/collisionGroups'
 import { useBoundStore } from '@/store/store'
 import { BoxTriggerZone } from '../Debug/BoxTriggerZone'
 import dfMapSetting from '@/settings/df_map_setting.json'
+import { logToGroup } from '@/helpers/logToGroup'
+import { LOG_GROUP } from '@/constant/logGroup'
 export const Tent = () => {
   const { nodes, materials } = useGLTF(Assets.TENT)
-  console.log({
-    nodes,
-    materials,
-  })
   const playerRef = useBoundStore((state) => state.playerRef)
-  console.log({ playerRef })
+  logToGroup(LOG_GROUP.MAP, { playerRef })
   const setInHouse = useBoundStore((state) => state.setInHouse)
   const onEnter = () => {
-    console.log('🏠 Vào ')
+    logToGroup(LOG_GROUP.MAP, '🏠 Vào ')
     setInHouse(true)
   }
   const onExit = () => {
-    console.log('🚪 Rời ')
+    logToGroup(LOG_GROUP.MAP, '🚪 Rời ')
     setInHouse(false)
   }
   return (

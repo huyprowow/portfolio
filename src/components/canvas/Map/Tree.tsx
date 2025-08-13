@@ -6,6 +6,8 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 import dfMapSetting from '@/settings/df_map_setting.json'
 import { useEffect, useMemo, useRef } from 'react'
 import * as THREE from 'three'
+import { logToGroup } from '@/helpers/logToGroup'
+import { LOG_GROUP } from '@/constant/logGroup'
 
 interface TreeProps {
   getElevation: (position: [number, number], uniforms: any, time: number) => number
@@ -54,7 +56,7 @@ const Tree = ({ getElevation, scaleMap, terrainUniforms }: TreeProps) => {
     const PLANE_SIZE = 10
     const mapSize = PLANE_SIZE * scaleMap
     const instances = []
-    console.log('�� Exclusion zones:', exclusionZones)
+    logToGroup(LOG_GROUP.MAP, '�� Exclusion zones:', exclusionZones)
 
     for (let i = 0; i < treeCount; i++) {
       const scaleInstance = 50
@@ -83,7 +85,7 @@ const Tree = ({ getElevation, scaleMap, terrainUniforms }: TreeProps) => {
       })
     }
 
-    console.log(`render ${instances.length} trees instance`)
+    logToGroup(LOG_GROUP.MAP, `render ${instances.length} trees instance`)
     return instances
   }, [])
   // Clone materials to avoid modifying the original

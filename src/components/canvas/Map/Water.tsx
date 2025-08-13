@@ -6,9 +6,11 @@ import waterFragmentShader from '@/_shaders/water/fragment.glsl'
 import dfMapSetting from '@/settings/df_map_setting.json'
 import { useFrame, useLoader } from '@react-three/fiber'
 import { Assets } from '@/helpers/assetMap'
+import { useControls } from 'leva'
 
 const Water = () => {
   const scaleMap = dfMapSetting.scaleTerrain
+  const {x} =useControls('Water', {x:1})
 
   const waterNoiseTexture = useLoader(THREE.TextureLoader, Assets.TEXTURE.NOISE.WATER_NOISE)
   // Enable smooth filtering

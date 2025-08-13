@@ -13,6 +13,8 @@ import CustomShaderMaterialVanilla from 'three-custom-shader-material/vanilla'
 import dfMapSetting from '@/settings/df_map_setting.json'
 import Grass from './Grass'
 import Tree from './Tree'
+import { logToGroup } from '@/helpers/logToGroup'
+import { LOG_GROUP } from '@/constant/logGroup'
 
 const levaConfig = {
   uPositionFrequency: { value: 0.2, min: 0, max: 1, step: 0.001 },
@@ -71,11 +73,11 @@ const getElevation = (position: [number, number], uniforms: any, time = 0) => {
 
   // Debug logging for first few points
   if (position[0] === -5 && position[1] === -5) {
-    console.log('=== getElevation Debug ===')
-    console.log('Position:', position)
-    console.log('Warped Position:', warpedPosition)
-    console.log('Noise values:', { noise1, noise2, noise3 })
-    console.log('Final elevation:', elevation)
+    logToGroup(LOG_GROUP.MAP, '=== getElevation Debug ===')
+    logToGroup(LOG_GROUP.MAP, 'Position:', position)
+    logToGroup(LOG_GROUP.MAP, 'Warped Position:', warpedPosition)
+    logToGroup(LOG_GROUP.MAP, 'Noise values:', { noise1, noise2, noise3 })
+    logToGroup(LOG_GROUP.MAP, 'Final elevation:', elevation)
   }
 
   return elevation
