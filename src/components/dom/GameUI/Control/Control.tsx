@@ -22,6 +22,7 @@ const Control = () => {
   const isMb = mobileAndTabletCheck()
   const gameMode = useBoundStore((state) => state.game.mode)
   const interacting = useBoundStore((state) => state.interacting)
+  const isInteractZone=useBoundStore((state) => state.isInteractZone)
   const handleTouchStart = ({ eventInitDict }: { eventInitDict: { key: string; code: string } }) => {
     logToGroup(LOG_GROUP.CONTROL, 'start touch')
     window.dispatchEvent(new KeyboardEvent('keydown', eventInitDict))
@@ -127,7 +128,7 @@ const Control = () => {
 
         {!isMb && (
           <div className='mode'>
-            {interacting && (
+            {isInteractZone && !interacting && (
               <button className={`key round ${interact ? 'active' : ''}`}>
                 <span
                   className='text-base relative top-1'

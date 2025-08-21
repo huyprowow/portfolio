@@ -176,7 +176,7 @@ const Slime = () => {
       </RigidBody>
       {/* Interaction Zone */}
       <BoxTriggerZone
-        size={[12, 4, 8]}
+        size={[12, 4, 12]}
         center={[
           df_npc_setting.slime.startPosition.x - 4,
           df_npc_setting.slime.startPosition.y + 2,
