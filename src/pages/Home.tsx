@@ -20,6 +20,7 @@ import LoadingScreen from '@/components/dom/LoadingScreen'
 import Slime from '@/components/canvas/NPC/Slime'
 import { LOG_GROUP } from '@/constant/logGroup'
 import { logToGroup } from '@/helpers/logToGroup'
+import { useBoundStore } from '@/store/store'
 const startDebug = () => {
   const hash = window.location.hash
   if (!hash) {
@@ -35,9 +36,10 @@ export default function Home() {
   const [{ orbit }, setOrbit] = useControls('Camera', () => ({
     orbit: false,
   }))
-
+  const setting = useBoundStore((state) => state.setting)
   useEffect(() => {
     logToGroup(LOG_GROUP.UTILS, import.meta.env.VITE_DEBUG_MODE)
+    
 
     if (import.meta.env.VITE_DEBUG_MODE === 'true' && !isDebugMode) {
       startDebug()
@@ -62,14 +64,35 @@ export default function Home() {
   )
   const { bgm } = useAudio()
   useEffect(() => {
-    if (dfGameSetting.audio.mute) return
-    const bgmName = dfGameSetting.audio.bgm.default.name
-    const currentBgm = bgm.filter((item) => item.key === bgmName)[0]
-    currentBgm.value.currentTime = 0
-    currentBgm.value.loop = true
-    currentBgm.value.volume = dfGameSetting.audio.bgm.default.volume
-    currentBgm.value.play()
-  }, [bgm])
+    if (!showContent) return
+
+    const playBgm = () => {
+      if (setting.audio.mute) return
+      const bgmName = dfGameSetting.audio.bgm.default.name
+      const current = bgm.find((i) => i.key === bgmName)?.value
+      if (!current) return
+      current.loop = true
+      current.volume = dfGameSetting.audio.bgm.default.volume
+      current
+        .play()
+        .then(() => {
+          window.removeEventListener('pointerdown', playBgm)
+          window.removeEventListener('keydown', playBgm)
+        })
+        .catch(() => {
+          /* ignored by autoplay until gesture */
+        })
+    }
+
+    // Try immediately (may be blocked), then listen for a gesture
+    playBgm()
+    window.addEventListener('pointerdown', playBgm)
+    window.addEventListener('keydown', playBgm)
+    return () => {
+      window.removeEventListener('pointerdown', playBgm)
+      window.removeEventListener('keydown', playBgm)
+    }
+  }, [showContent, setting.audio.mute, bgm])
   const handleLoadingComplete = () => {
     setShowContent(true)
   }

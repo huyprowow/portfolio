@@ -10,7 +10,7 @@ import { useControls } from 'leva'
 
 const Water = () => {
   const scaleMap = dfMapSetting.scaleTerrain
-  const {x} =useControls('Water', {x:1})
+  const { x } = useControls('Water', { x: 1 })
 
   const waterNoiseTexture = useLoader(THREE.TextureLoader, Assets.TEXTURE.NOISE.WATER_NOISE)
   // Enable smooth filtering

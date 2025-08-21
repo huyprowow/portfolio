@@ -8,6 +8,7 @@ import { useEffect, useMemo, useRef } from 'react'
 import * as THREE from 'three'
 import { logToGroup } from '@/helpers/logToGroup'
 import { LOG_GROUP } from '@/constant/logGroup'
+import { useDebugMode } from '@/hooks/useDebugMode'
 
 interface TreeProps {
   getElevation: (position: [number, number], uniforms: any, time: number) => number
@@ -46,6 +47,7 @@ const isPositionExcluded = (x: number, z: number): boolean => {
 
 const Tree = ({ getElevation, scaleMap, terrainUniforms }: TreeProps) => {
   const scene = useLoader(GLTFLoader, Assets.TREE)
+  const isDebugMode = useDebugMode()
   const leavesRigidBodiesRef = useRef<any>(null)
   const trunkRigidBodiesRef = useRef<any>(null)
   const { world } = useRapier()
@@ -206,16 +208,17 @@ const Tree = ({ getElevation, scaleMap, terrainUniforms }: TreeProps) => {
       />
     </group> */}
       {/* Debug visualization of exclusion zones */}
-      {exclusionZones.map((zone, index) => {
-        const [centerX, centerZ] = zone.center
-        const [sizeX, sizeZ] = zone.size
-        return (
-          <mesh key={`exclusion-zone-${index}`} position={[centerX, 20, centerZ]} rotation={[-Math.PI / 2, 0, 0]}>
-            <planeGeometry args={[sizeX, sizeZ]} />
-            <meshBasicMaterial color='red' transparent opacity={0.3} wireframe={true} />
-          </mesh>
-        )
-      })}
+      {isDebugMode &&
+        exclusionZones.map((zone, index) => {
+          const [centerX, centerZ] = zone.center
+          const [sizeX, sizeZ] = zone.size
+          return (
+            <mesh key={`exclusion-zone-${index}`} position={[centerX, 20, centerZ]} rotation={[-Math.PI / 2, 0, 0]}>
+              <planeGeometry args={[sizeX, sizeZ]} />
+              <meshBasicMaterial color='red' transparent opacity={0.3} wireframe={true} />
+            </mesh>
+          )
+        })}
       <group>
         {/* Leaves */}
         <InstancedRigidBodies ref={leavesRigidBodiesRef} instances={instances} type='fixed' colliders={'hull'}>

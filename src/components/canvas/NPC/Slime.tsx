@@ -11,6 +11,7 @@ import { BoxTriggerZone } from '../Debug/BoxTriggerZone'
 import { EInteractObjectId, ETriggerMode } from '@/constant/enum'
 import * as THREE from 'three'
 import df_npc_setting from '@/settings/df_npc_setting.json'
+import dialogue_script from '@/components/dom/DialogueAndCutscene/dialogue_script.json'
 const Slime = () => {
   const group = useRef<Group>(null)
   const { nodes, materials, animations } = useGLTF(Assets.NPC.SLIME)
@@ -21,8 +22,10 @@ const Slime = () => {
   const interacting = useBoundStore((state) => state.interacting)
   const setInteracting = useBoundStore((state) => state.setInteracting)
   const timeoutRef = useRef<NodeJS.Timeout | null>(null)
+  const dialogueTimeoutRef = useRef<NodeJS.Timeout | null>(null)
   const slime = useRef<RapierRigidBody>(null)
   const [isFollowing, setIsFollowing] = useState(false)
+  const setDialogue = useBoundStore((state) => state.setDialogue)
   useEffect(() => {
     actions?.['Slime_Idle']?.play()
   }, [actions])
@@ -32,11 +35,22 @@ const Slime = () => {
       isInteract: true,
       interactObjectId: EInteractObjectId.SLIME,
     })
+    setDialogue({
+      actor: dialogue_script.dialogue[0].actor,
+      text: dialogue_script.dialogue[0].text,
+      timeToHide: dialogue_script.dialogue[0].timeToHide,
+    })
+
     timeoutRef.current = setTimeout(() => {
       setInteracting(null)
       timeoutRef.current = null
     }, 1000)
-     setIsFollowing(true)
+    dialogueTimeoutRef.current = setTimeout(() => {
+      setDialogue(null)
+      dialogueTimeoutRef.current = null
+    }, dialogue_script.dialogue[0].timeToHide)
+
+    setIsFollowing(true)
   }
 
   const followPlayer = () => {
@@ -75,6 +89,9 @@ const Slime = () => {
       if (timeoutRef.current) {
         clearTimeout(timeoutRef.current)
       }
+      if (dialogueTimeoutRef.current) {
+        clearTimeout(dialogueTimeoutRef.current)
+      }
     }
   }, [subscribeKeys])
 
@@ -86,11 +103,11 @@ const Slime = () => {
     logToGroup(LOG_GROUP.NPC, 'Slime Out Zone')
     setIsInteractZone(false)
   }
-  logToGroup(LOG_GROUP.NPC, {
-    x: df_npc_setting.slime.startPosition.x,
-    y: df_npc_setting.slime.startPosition.y + 2,
-    z: df_npc_setting.slime.startPosition.z,
-  })
+  // logToGroup(LOG_GROUP.NPC, {
+  //   x: df_npc_setting.slime.startPosition.x,
+  //   y: df_npc_setting.slime.startPosition.y + 2,
+  //   z: df_npc_setting.slime.startPosition.z,
+  // })
   const textInteractMaterial = new THREE.MeshBasicMaterial({
     color: 'red',
     side: THREE.DoubleSide,
@@ -131,7 +148,7 @@ const Slime = () => {
               rotation={[0, -Math.PI / 2, 0]}
             >
               <Text3D font={Assets.FONT.ROBOTO_SEMIBOLD_REGULAR} scale={1} bevelEnabled material={textChatMaterial}>
-                Hi, I'm Slime &gt; &lt;
+                {dialogue_script.dialogue[0].bubbleText}
               </Text3D>
             </Center>
           )}
