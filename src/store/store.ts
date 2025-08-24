@@ -5,6 +5,7 @@ import { createCameraSlice, ICameraSlice } from './camera'
 import { createGameSlice } from './game'
 import { createRendererSlice } from './renderer'
 import { createDialogueAndCutSceneSlice } from './dialogueAndCutScene'
+import { IGameSlice } from '@/@types/store/IGameSlice'
 export const useBoundStore = create<
   ICharacterSlice & ICharacterAnimationSlice & ICameraSlice & IGameSlice & IRendererSlice & IDialogueAndCutSceneSlice
 >()((...a) => ({

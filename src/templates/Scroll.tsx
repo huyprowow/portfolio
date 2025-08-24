@@ -12,7 +12,7 @@ const state = {
 
 const { damp } = THREE.MathUtils
 
-export default function Scroll({ children }) {
+export default function Scroll({ children }: { children: React.ReactNode }) {
   const content = useRef(null)
   const wrapper = useRef(null)
 
@@ -21,7 +21,7 @@ export default function Scroll({ children }) {
       wrapper: wrapper.current,
       content: content.current,
       duration: 1.2,
-      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)), // https://www.desmos.com/calculator/brs54l4xou
+      easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)), // https://www.desmos.com/calculator/brs54l4xou
       direction: 'vertical', // vertical, horizontal
       gestureDirection: 'vertical', // vertical, horizontal, both
       smooth: true,
@@ -30,7 +30,7 @@ export default function Scroll({ children }) {
       infinite: false,
     })
 
-    lenis.on('scroll', ({ scroll, progress }) => {
+    lenis.on('scroll', ({ scroll, progress }: { scroll: number; progress: number }) => {
       state.top = scroll
       state.progress = progress
     })

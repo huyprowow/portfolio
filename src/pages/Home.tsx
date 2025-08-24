@@ -1,5 +1,5 @@
 import { Physics } from '@react-three/rapier'
-import { GizmoHelper, GizmoViewport, Sky, Stats } from '@react-three/drei'
+import { GizmoHelper, GizmoViewport, Sky } from '@react-three/drei'
 import { useLoadingAssets } from '../hooks/useLoading'
 import { usePageVisible } from '../hooks/usePageVisible'
 import { SceneView, SceneCommon } from '../components/canvas/View'
