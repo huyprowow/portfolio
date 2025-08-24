@@ -1,4 +1,15 @@
 {
+  "functions": {
+    "public/assets/**/*.glb": {
+      "maxDuration": 30
+    },
+    "public/assets/**/*.fbx": {
+      "maxDuration": 30
+    },
+    "public/assets/**/*.pmx": {
+      "maxDuration": 30
+    }
+  },
   "headers": [
     {
       "source": "/assets/:path*.glb",
