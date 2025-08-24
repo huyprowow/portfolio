@@ -166,8 +166,7 @@ const Control = () => {
          fixed bottom-[170px] sm:static sm:bottom-auto'
           >
             <span className='actor bold bg-white text-orange-500 rounded-md p-1 m-1 bg-opacity-75'>
-              {dialogue.actor}:
-              {/* sajdsjdjsd */}
+              {dialogue.actor}:{/* sajdsjdjsd */}
             </span>{' '}
             <span className='text bold break-all whitespace-pre-wrap leading-relaxed'>
               {dialogue.text}

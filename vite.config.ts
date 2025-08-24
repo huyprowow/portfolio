@@ -34,7 +34,7 @@ export default defineConfig({
     sourcemap: false,
     target: 'esnext',
     rollupOptions: {
-      external: ['three', 'three-stdlib'],
+      // external: ['three', 'three-stdlib'],
       output: {
         globals: {
           three: 'THREE',
