@@ -19,7 +19,7 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src'),
       three: path.resolve(__dirname, 'node_modules/three'),
       'three-stdlib': path.resolve(__dirname, 'node_modules/three-stdlib'),
-      '@framework': path.resolve(__dirname, './src/lib/CubismSdkForWeb-5-r.4/Framework/src'),
+      // '@framework': path.resolve(__dirname, './src/lib/CubismSdkForWeb-5-r.4/Framework/src'),
     },
   },
   server: {

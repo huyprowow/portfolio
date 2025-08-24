@@ -42,4 +42,4 @@ report.*.json
 .vscode/*-debug-profile
 
 Referance_Movement_Systems_Replica_Exclude_Climbing.mp4
-# /src/lib/CubismSdkForWeb-5-r.4
+/src/lib/CubismSdkForWeb-5-r.4
