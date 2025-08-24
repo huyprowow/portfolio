@@ -1,7 +1,7 @@
 {
   "headers": [
     {
-      "source": "/assets/(.*).glb",
+      "source": "/assets/:path*.glb",
       "headers": [
         {
           "key": "Content-Type",
@@ -10,7 +10,7 @@
       ]
     },
     {
-      "source": "/assets/(.*).fbx",
+      "source": "/assets/:path*.fbx",
       "headers": [
         {
           "key": "Content-Type",
@@ -19,7 +19,7 @@
       ]
     },
     {
-      "source": "/assets/(.*).pmx",
+      "source": "/assets/:path*.pmx",
       "headers": [
         {
           "key": "Content-Type",

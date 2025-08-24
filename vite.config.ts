@@ -41,8 +41,6 @@ export default defineConfig({
           'three-stdlib': 'THREE_STDLIB',
         },
         assetFileNames: (assetInfo) => {
-          const info = assetInfo.name.split('.')
-          const ext = info[info.length - 1]
           if (/\.(glb|fbx|pmx)$/.test(assetInfo.name)) {
             return `assets/[name].[ext]`
           }
