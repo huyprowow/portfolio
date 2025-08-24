@@ -35,6 +35,7 @@ const Control = () => {
   }
   const dialogue = useBoundStore((state) => state.dialogue)
   const setting = useBoundStore((state) => state.setting)
+  logToGroup(LOG_GROUP.CONTROL, 'interact', interact)
 
   return (
     <div
@@ -45,129 +46,136 @@ const Control = () => {
     >
       <div className='left-section'>
         {/* {(setting.control.hide === true && !isMb) && ( */}
-        <>
-          <div className='move'>
-            <div className='raw'>
-              <button
-                className={`key ${forward ? 'active' : ''}`}
-                onTouchStart={() =>
-                  handleTouchStart({
-                    eventInitDict: { key: 'w', code: 'KeyW' },
-                  })
-                }
-                onTouchEnd={() =>
-                  handleTouchEnd({
-                    eventInitDict: { key: 'w', code: 'KeyW' },
-                  })
-                }
-              >
-                W
-              </button>
-            </div>
-            <div className='raw'>
-              <button
-                className={`key ${left ? 'active' : ''}`}
-                onTouchStart={() =>
-                  handleTouchStart({
-                    eventInitDict: { key: 'a', code: 'KeyA' },
-                  })
-                }
-                onTouchEnd={() =>
-                  handleTouchEnd({
-                    eventInitDict: { key: 'a', code: 'KeyA' },
-                  })
-                }
-              >
-                A
-              </button>
-              <button
-                className={`key ${back ? 'active' : ''}`}
-                onTouchStart={() =>
-                  handleTouchStart({
-                    eventInitDict: { key: 's', code: 'KeyS' },
-                  })
-                }
-                onTouchEnd={() =>
-                  handleTouchEnd({
-                    eventInitDict: { key: 's', code: 'KeyS' },
-                  })
-                }
-              >
-                S
-              </button>
-              <button
-                className={`key ${right ? 'active' : ''}`}
-                onTouchStart={() =>
-                  handleTouchStart({
-                    eventInitDict: { key: 'd', code: 'KeyD' },
-                  })
-                }
-                onTouchEnd={() =>
-                  handleTouchEnd({
-                    eventInitDict: { key: 'd', code: 'KeyD' },
-                  })
-                }
-              >
-                D
-              </button>
-            </div>
-            <div className='raw'>
-              <button
-                className={`key large ${jump ? 'active' : ''}`}
-                onTouchStart={() =>
-                  handleTouchStart({
-                    eventInitDict: { key: ' ', code: 'Space' },
-                  })
-                }
-                onTouchEnd={() =>
-                  handleTouchEnd({
-                    eventInitDict: { key: ' ', code: 'Space' },
-                  })
-                }
-              >
-                Space
-              </button>
-            </div>
+        <div className='move'>
+          <div className='raw'>
+            <button
+              className={`key ${forward ? 'active' : ''}`}
+              onTouchStart={() =>
+                handleTouchStart({
+                  eventInitDict: { key: 'w', code: 'KeyW' },
+                })
+              }
+              onTouchEnd={() =>
+                handleTouchEnd({
+                  eventInitDict: { key: 'w', code: 'KeyW' },
+                })
+              }
+            >
+              W
+            </button>
           </div>
+          <div className='raw'>
+            <button
+              className={`key ${left ? 'active' : ''}`}
+              onTouchStart={() =>
+                handleTouchStart({
+                  eventInitDict: { key: 'a', code: 'KeyA' },
+                })
+              }
+              onTouchEnd={() =>
+                handleTouchEnd({
+                  eventInitDict: { key: 'a', code: 'KeyA' },
+                })
+              }
+            >
+              A
+            </button>
+            <button
+              className={`key ${back ? 'active' : ''}`}
+              onTouchStart={() =>
+                handleTouchStart({
+                  eventInitDict: { key: 's', code: 'KeyS' },
+                })
+              }
+              onTouchEnd={() =>
+                handleTouchEnd({
+                  eventInitDict: { key: 's', code: 'KeyS' },
+                })
+              }
+            >
+              S
+            </button>
+            <button
+              className={`key ${right ? 'active' : ''}`}
+              onTouchStart={() =>
+                handleTouchStart({
+                  eventInitDict: { key: 'd', code: 'KeyD' },
+                })
+              }
+              onTouchEnd={() =>
+                handleTouchEnd({
+                  eventInitDict: { key: 'd', code: 'KeyD' },
+                })
+              }
+            >
+              D
+            </button>
+          </div>
+          <div className='raw'>
+            <button
+              className={`key large ${jump ? 'active' : ''}`}
+              onTouchStart={() =>
+                handleTouchStart({
+                  eventInitDict: { key: ' ', code: 'Space' },
+                })
+              }
+              onTouchEnd={() =>
+                handleTouchEnd({
+                  eventInitDict: { key: ' ', code: 'Space' },
+                })
+              }
+            >
+              Space
+            </button>
+          </div>
+        </div>
 
-          {!isMb && (
-            <div className='mode'>
-              {isInteractZone && !interacting && (
-                <button className={`key round ${interact ? 'active' : ''}`}>
-                  <span
-                    className='text-base relative top-1'
-                    onTouchStart={() =>
-                      handleTouchStart({
-                        eventInitDict: { key: 'x', code: 'KeyX' },
-                      })
-                    }
-                    onTouchEnd={() =>
-                      handleTouchEnd({
-                        eventInitDict: { key: 'x', code: 'KeyX' },
-                      })
-                    }
-                  >
-                    X
-                  </span>
-                  <sub className='text-xs '>interact</sub>
-                </button>
-              )}
-              <button className={`key round ${gameMode === EGameMode.Follow ? 'active' : ''}`}>
-                <span className='text-base relative top-1'>F</span>
-                <sub className='text-xs '>{gameMode}</sub>
-              </button>
-            </div>
+        <div className='mode'>
+          {isInteractZone && !interacting && (
+            <button className={`key round ${interact ? 'active' : ''}`}>
+              <span
+                className='text-base relative top-1'
+                onTouchStart={() => {
+                  handleTouchStart({
+                    eventInitDict: { key: 'x', code: 'KeyX' },
+                  })
+                  handleTouchEnd({
+                    eventInitDict: { key: 'x', code: 'KeyX' },
+                  })
+                }}
+              >
+                X
+              </span>
+              <sub className='text-xs '>interact</sub>
+            </button>
           )}
-        </>
+          {!isMb && (
+            <button className={`key round ${gameMode === EGameMode.Follow ? 'active' : ''}`}>
+              <span className='text-base relative top-1'>F</span>
+              <sub className='text-xs '>{gameMode}</sub>
+            </button>
+          )}
+        </div>
         {/* )} */}
       </div>
 
       {dialogue ? (
-        <div className='dialogue'>
-          <span className='actor text-2xl bold bg-white text-orange-500 rounded-md p-1 m-1 bg-opacity-75'>
-            {dialogue.actor}:
-          </span>{' '}
-          <span className='text text-2xl bold text-wrap'>{dialogue.text}</span>
+        <div className='flex items-center justify-center'>
+          <div
+            className='dialogue text-sm md:text-base lg:text-2xl  max-w-[300px] md:max-w-[500px] lg:max-w-[700px] mx-auto min-h-[60px]
+         fixed bottom-[170px] sm:static sm:bottom-auto'
+          >
+            <span className='actor bold bg-white text-orange-500 rounded-md p-1 m-1 bg-opacity-75'>
+              {dialogue.actor}:
+              {/* sajdsjdjsd */}
+            </span>{' '}
+            <span className='text bold break-all whitespace-pre-wrap leading-relaxed'>
+              {dialogue.text}
+              {/* sajdsjdjsddcggddddddddddddd
+                  cccccccccccccccccccccdddd
+              snbbbbbbbbbbbbbbbbbbbbbbbbb bbbbbbbbbbbbbbbbbbbbbbbbbbbb */}
+            </span>
+          </div>
         </div>
       ) : null}
       <div className='skill'>

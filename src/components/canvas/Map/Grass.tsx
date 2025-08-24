@@ -11,6 +11,7 @@ import { useBoundStore } from '@/store/store'
 import { useControls } from 'leva'
 import { logToGroup } from '@/helpers/logToGroup'
 import { LOG_GROUP } from '@/constant/logGroup'
+import { mobileAndTabletCheck } from '@/helpers/mobileAndTabletCheck'
 const PLANE_SIZE = 10
 // const BLADE_COUNT = 1000 //000
 // const INSTANCES_LIMIT = 10000 * 1000 //* 2000
@@ -44,6 +45,8 @@ interface GrassProps {
 const Grass = ({ getElevation, terrainUniforms, scaleMap }: GrassProps) => {
   const grassRef = useRef<THREE.InstancedMesh>(null)
   const playerRef = useBoundStore((state) => state.playerRef)
+  const isMb = mobileAndTabletCheck()
+  levaConfig.instancesLimit.value = isMb ? 3500000 : 10000000 //10000000
   const { uWindStrength, instancesLimit } = useControls('Grass', levaConfig)
 
   useEffect(() => {

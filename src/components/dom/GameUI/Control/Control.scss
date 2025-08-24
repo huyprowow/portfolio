@@ -42,6 +42,8 @@
     }
   }
   .mode {
+    max-width: 73px;   
+    min-width: 73px;
     display: flex;
     flex-direction: column;
     justify-content: end;
@@ -144,7 +146,9 @@
       }
     }
     .mode {
-      .key {
+      max-width: auto ;
+      min-width: auto ;
+        .key {
         width: 80px;
         height: 80px;
       }

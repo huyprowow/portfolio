@@ -3,7 +3,7 @@
     {
       "actor": "Slime",
       "bubbleText": "Chào, tôi là Slime ><",
-      "text": "Chào, tôi là Slime >< (Hi, I'm Slime ><)",
+      "text": "Chào, tôi là Slime >< \n(Hi, I'm Slime ><)",
       "timeToHide": 2000
     }
   ]

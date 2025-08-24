@@ -135,6 +135,7 @@ export const Assets = {
     SFX: {},
   },
   FONT: {
+    // ROBOTO_SEMIBOLD_REGULAR: 'assets/font/Roboto/Roboto_SemiBold_Regular.json',
     ROBOTO_SEMIBOLD_REGULAR: 'assets/font/Roboto/Roboto_SemiBold_Regular.json',
   },
 }

@@ -24,7 +24,7 @@ const UI = () => {
     )
     return () => unsubscribe()
   }, [changeMode, gameMode, setGameMode, subscribeKeys])
-
+  console.log('gameMode', import.meta.env.VITE_LOG_CONSOLE_UI)
   return (
     <div
       style={{
@@ -41,7 +41,7 @@ const UI = () => {
       <SettingDialog>
         <Setting />
       </SettingDialog>
-      {import.meta.env.VITE_LOG_CONSOLE === 'true' ? <Logger /> : null}
+      {import.meta.env.VITE_LOG_CONSOLE_UI === 'true' ? <Logger /> : null}
     </div>
   )
 }

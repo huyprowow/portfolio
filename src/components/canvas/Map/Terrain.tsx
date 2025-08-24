@@ -264,16 +264,16 @@ const Terrain = () => {
         }}
         scaleMap={scaleMap}
       />
-      <Grass
-        getElevation={getElevation}
-        terrainUniforms={{
-          uPositionFrequency,
-          uStrength,
-          uWarpFrequency,
-          uWarpStrength,
-        }}
-        scaleMap={scaleMap}
-      />
+        <Grass
+          getElevation={getElevation}
+          terrainUniforms={{
+            uPositionFrequency,
+            uStrength,
+            uWarpFrequency,
+            uWarpStrength,
+          }}
+          scaleMap={scaleMap}
+        />
       <mesh
         geometry={geometry}
         position={[

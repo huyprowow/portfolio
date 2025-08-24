@@ -31,6 +31,15 @@ const Slime = () => {
   }, [actions])
 
   const interactSlime = () => {
+    // Clear any existing timeouts first
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current)
+      timeoutRef.current = null
+    }
+    if (dialogueTimeoutRef.current) {
+      clearTimeout(dialogueTimeoutRef.current)
+      dialogueTimeoutRef.current = null
+    }
     setInteracting({
       isInteract: true,
       interactObjectId: EInteractObjectId.SLIME,
@@ -52,7 +61,7 @@ const Slime = () => {
 
     setIsFollowing(true)
   }
-
+  
   const followPlayer = () => {
     if (!slime.current) return
     const distanceToStartPosition = Math.sqrt(
@@ -92,6 +101,8 @@ const Slime = () => {
       if (dialogueTimeoutRef.current) {
         clearTimeout(dialogueTimeoutRef.current)
       }
+      setInteracting(null)
+      setDialogue(null)
     }
   }, [subscribeKeys])
 

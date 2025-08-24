@@ -276,7 +276,7 @@ export default function Logger() {
       style={{
         position: 'fixed',
         bottom: 0,
-        right: '50%',
+        right: '20%',
         width: 450,
         maxHeight: '60vh',
         overflowY: 'auto',
