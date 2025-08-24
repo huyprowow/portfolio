@@ -19,7 +19,7 @@ const DeveloperSetting = () => {
         <b>Developer info</b>
         <div className='p-2 m-2 glass-effect  flex flex-row gap-2 justify-between'>
           <div className='flex flex-row gap-2'>
-            <Linkedin />|<Github />|
+            {/* <Linkedin />|<Github />| */}
             <a href='mailto:huyprowow@gmail.com'>
               <Mail />
             </a>

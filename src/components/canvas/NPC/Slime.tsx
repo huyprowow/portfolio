@@ -61,7 +61,7 @@ const Slime = () => {
 
     setIsFollowing(true)
   }
-  
+
   const followPlayer = () => {
     if (!slime.current) return
     const distanceToStartPosition = Math.sqrt(
