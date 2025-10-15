@@ -4,3 +4,6 @@
 set:  
 ```SET RENDERDOC_HOOK_EGL=0```  
 ```call "chrome.exe" --disable-gpu-sandbox --gpu-startup-dialog```
+
+- vggt
+```python demo_gradio.py```
