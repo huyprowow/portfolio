@@ -42,6 +42,7 @@ varying vec3 vPosition;
 varying float vUpDot;
 varying vec2 vUv;
 
+
 // Triplanar blend function
 vec3 blendFactor(vec3 normal, float sharpness) {
   vec3 absNormal = abs(normal);
