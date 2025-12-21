@@ -42,7 +42,6 @@ varying vec3 vPosition;
 varying float vUpDot;
 varying vec2 vUv;
 
-
 // Triplanar blend function
 vec3 blendFactor(vec3 normal, float sharpness) {
   vec3 absNormal = abs(normal);
@@ -192,7 +191,7 @@ void main() {
   csm_DiffuseColor = vec4(finalColor, 1.0);
   csm_Roughness = finalRoughness;
   csm_Metalness = finalMetallic;
-  csm_Bump = finalBump; // Use csm_Bump for normal mapping
+  // csm_Bump = finalBump; // Use csm_Bump for normal mapping
   csm_DiffuseColor.rgb *= finalAO;
   // csm_AO = finalAO;
 

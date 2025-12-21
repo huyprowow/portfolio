@@ -43,6 +43,7 @@
     "three-custom-shader-material": "^6.3.7",
     "three-stdlib": "^2.28.9",
     "tunnel-rat": "^0.1.2",
+    "yuka": "^0.7.8",
     "zustand": "^4.4.1"
   },
   "devDependencies": {
@@ -50,6 +51,7 @@
     "@types/node": "^20.6.2",
     "@types/react": "^18.2.21",
     "@types/react-dom": "^18.3.1",
+    "@types/yuka": "^0.7.4",
     "@vitejs/plugin-react": "^4.2.1",
     "autoprefixer": "^10.4.16",
     "eslint": "^8.56.0",

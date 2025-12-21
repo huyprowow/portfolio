@@ -10,6 +10,7 @@ import { useBoundStore } from '@/store/store'
 import { BoxTriggerZone } from '../Debug/BoxTriggerZone'
 import { EInteractObjectId, ETriggerMode } from '@/constant/enum'
 import * as THREE from 'three'
+import * as YUKA from 'yuka'
 import df_npc_setting from '@/settings/df_npc_setting.json'
 import dialogue_script from '@/components/dom/DialogueAndCutscene/dialogue_script.json'
 const Slime = () => {
@@ -26,6 +27,8 @@ const Slime = () => {
   const slime = useRef<RapierRigidBody>(null)
   const [isFollowing, setIsFollowing] = useState(false)
   const setDialogue = useBoundStore((state) => state.setDialogue)
+  const playerRef = useBoundStore((state) => state.playerRef)
+
   useEffect(() => {
     actions?.['Slime_Idle']?.play()
   }, [actions])
@@ -70,10 +73,44 @@ const Slime = () => {
         (slime.current.translation().z - df_npc_setting.slime.startPosition.z) ** 2,
     )
     const maxDistance = 10
-    if (distanceToStartPosition < 10) {
+    if (distanceToStartPosition > maxDistance) {
       // move to start position
+      const startPosition = new YUKA.Vector3(
+        df_npc_setting.slime.startPosition.x,
+        df_npc_setting.slime.startPosition.y,
+        df_npc_setting.slime.startPosition.z,
+      )
+      const direction = new YUKA.Vector3(
+        startPosition.x - slime.current.translation().x,
+        startPosition.y - slime.current.translation().y,
+        startPosition.z - slime.current.translation().z,
+      )
+      direction.normalize()
+      const velocity = new YUKA.Vector3(direction.x * 10, direction.y * 10, direction.z * 10)
+      slime.current.setLinvel({ x: velocity.x, y: velocity.y, z: velocity.z }, true)
+      logToGroup(LOG_GROUP.NPC, 'moving back to start position')
+      
+      
     } else {
+      // follow player
+      const playerPosition = playerRef.current?.translation()
+      if (!playerPosition) return
+      const direction = new YUKA.Vector3(
+        playerPosition.x - slime.current.translation().x,
+        playerPosition.y - slime.current.translation().y,
+        playerPosition.z - slime.current.translation().z,
+      )
+      direction.normalize()
+      const velocity = new YUKA.Vector3(direction.x * 10, direction.y * 10, direction.z * 10)
+      slime.current.setLinvel({ x: velocity.x, y: velocity.y, z: velocity.z }, true)
+      logToGroup(LOG_GROUP.NPC, 'following player')
+      
     }
+    logToGroup(LOG_GROUP.NPC, 'npc position', slime.current.translation())
+    logToGroup(LOG_GROUP.NPC, 'start position', df_npc_setting.slime.startPosition)
+    logToGroup(LOG_GROUP.NPC, 'distance to start position', distanceToStartPosition)
+    
+    
   }
   useFrame(() => {
     if (isFollowing) {
@@ -81,7 +118,6 @@ const Slime = () => {
     }
   })
 
-  const playerRef = useBoundStore((state) => state.playerRef)
   // hear jump key press
   useEffect(() => {
     const unSubscribeInteractKey = subscribeKeys(
@@ -165,18 +201,19 @@ const Slime = () => {
           )}
         </>
       )}
-      <RigidBody type='kinematicPosition' colliders='hull' ref={slime}>
-        <group
-          ref={group}
-          dispose={null}
-          scale={3}
-          position={[
-            df_npc_setting.slime.startPosition.x,
-            df_npc_setting.slime.startPosition.y,
-            df_npc_setting.slime.startPosition.z,
-          ]}
-          rotation={[0, Math.PI / 2, 0]}
-        >
+      <RigidBody
+        type='kinematicPosition'
+        colliders='hull'
+        ref={slime}
+        position={[
+          df_npc_setting.slime.startPosition.x,
+          df_npc_setting.slime.startPosition.y,
+          df_npc_setting.slime.startPosition.z,
+        ]}
+        scale={3}
+        rotation={[0, Math.PI / 2, 0]}
+      >
+        <group ref={group} dispose={null}>
           <group name='Scene'>
             <group name='Root'>
               <skinnedMesh
