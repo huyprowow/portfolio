@@ -1,5 +1,5 @@
 import { Assets } from '@/helpers/assetMap'
-import { Center, Text3D, useAnimations, useGLTF, useKeyboardControls } from '@react-three/drei'
+import { Center, FontData, Text3D, useAnimations, useFont, useGLTF, useKeyboardControls } from '@react-three/drei'
 import { useFrame, useLoader } from '@react-three/fiber'
 import { useEffect, useRef, useState } from 'react'
 import { Group } from 'three'
@@ -28,6 +28,8 @@ const Slime = () => {
   const [isFollowing, setIsFollowing] = useState(false)
   const setDialogue = useBoundStore((state) => state.setDialogue)
   const playerRef = useBoundStore((state) => state.playerRef)
+  const font =useFont(Assets.FONT.ROBOTO_SEMIBOLD_REGULAR)
+  const fontData = font.data as FontData
 
   useEffect(() => {
     actions?.['Slime_Idle']?.play()
@@ -168,9 +170,8 @@ const Slime = () => {
     <group>
       {isInteractZone && (
         <>
-          {!timeoutRef.current && (
             <Text3D
-              font={Assets.FONT.ROBOTO_SEMIBOLD_REGULAR}
+              font={fontData}
               position={[
                 df_npc_setting.slime.startPosition.x,
                 df_npc_setting.slime.startPosition.y + 5,
@@ -180,10 +181,10 @@ const Slime = () => {
               scale={1}
               bevelEnabled
               material={textInteractMaterial}
+              visible={!timeoutRef.current && isInteractZone}
             >
               x
             </Text3D>
-          )}
 
           {interacting?.interactObjectId === EInteractObjectId.SLIME && (
             <Center
@@ -194,7 +195,7 @@ const Slime = () => {
               ]}
               rotation={[0, -Math.PI / 2, 0]}
             >
-              <Text3D font={Assets.FONT.ROBOTO_SEMIBOLD_REGULAR} scale={1} bevelEnabled material={textChatMaterial}>
+              <Text3D font={fontData} scale={1} bevelEnabled material={textChatMaterial}>
                 {dialogue_script.dialogue[0].bubbleText}
               </Text3D>
             </Center>
@@ -259,3 +260,4 @@ const Slime = () => {
 }
 export default Slime
 useGLTF.preload(Assets.NPC.SLIME)
+useFont.preload(Assets.FONT.ROBOTO_SEMIBOLD_REGULAR)
