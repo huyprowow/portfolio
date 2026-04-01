@@ -8,7 +8,7 @@ const Setting = () => {
       // asChild
       >
         <div className='pointer-events-auto cursor-pointer  '>
-          <IoSettingsOutline className='text-white text-2xl bold absolute right-2  top-1/2 ' />
+          <IoSettingsOutline className='text-white text-2xl bold ' />
         </div>
       </DialogTrigger>
     </div>

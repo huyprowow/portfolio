@@ -6,6 +6,7 @@ import { useKeyboardControls } from '@react-three/drei'
 import { EGameMode } from '@/constant/enum'
 import { SettingDialog } from './GameUI/Setting/SettingDialog'
 import Logger from '@/helpers/Logger'
+import Ads from './GameUI/Ads/Ads'
 const UI = () => {
   const gameMode = useBoundStore((state) => state.game.mode)
   const setGameMode = useBoundStore((state) => state.setGameMode)
@@ -38,9 +39,12 @@ const UI = () => {
       }}
     >
       <Control />
-      <SettingDialog>
-        <Setting />
-      </SettingDialog>
+      <div className='absolute right-2 top-1/2 flex gap-4'>
+        <Ads />
+        <SettingDialog>
+          <Setting />
+        </SettingDialog>
+      </div>
       {import.meta.env.VITE_LOG_CONSOLE_UI === 'true' ? <Logger /> : null}
     </div>
   )
