@@ -7,10 +7,13 @@ import dfMapSetting from '@/settings/df_map_setting.json'
 import { useFrame, useLoader } from '@react-three/fiber'
 import { Assets } from '@/helpers/assetMap'
 import { useControls } from 'leva'
+import { useRef } from 'react'
+import { useBoundStore } from '@/store/store'
 
 const Water = () => {
   const scaleMap = dfMapSetting.scaleTerrain
   const { x } = useControls('Water', { x: 1 })
+  const meshRef = useRef<THREE.Mesh>(null)
 
   const waterNoiseTexture = useLoader(THREE.TextureLoader, Assets.TEXTURE.NOISE.WATER_NOISE)
   // Enable smooth filtering
@@ -30,6 +33,7 @@ const Water = () => {
     const waterSfM = new CustomShaderMaterialVanilla({
       vertexShader: waterVertexShader,
       fragmentShader: waterFragmentShader,
+      side: THREE.DoubleSide,
       uniforms: {
         uWaterNoiseTexture: new THREE.Uniform(waterNoiseTexture),
         uTime: new THREE.Uniform(0),
@@ -50,7 +54,10 @@ const Water = () => {
 
   useFrame((state) => {
     waterSurfaceMaterial.uniforms.uTime.value = state.clock.getElapsedTime()
-  })
+    if (meshRef.current) {
+      useBoundStore.getState().syncWaterWorldFromObject(meshRef.current)
+    }
+  }, -1)
 
   useEffect(() => {
     return () => {
@@ -70,6 +77,7 @@ const Water = () => {
         dfMapSetting.object.water.startPosition.z,
       ]}
       scale={scaleMap}
+      ref={meshRef}
     ></mesh>
   )
 }

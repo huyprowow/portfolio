@@ -73,7 +73,7 @@ const GlSetter = () => {
 }
 export function SceneView({ children, orbit = true, className = '', target }: ViewProps) {
   return (
-    <Canvas className={className}>
+    <Canvas className={className} gl={{ outputColorSpace: THREE.SRGBColorSpace }}>
       <GlSetter />
       {orbit ? <OrbitView target={target} /> : null}
       {children}

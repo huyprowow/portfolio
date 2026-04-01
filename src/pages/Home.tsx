@@ -21,6 +21,8 @@ import Slime from '@/components/canvas/NPC/Slime'
 import { LOG_GROUP } from '@/constant/logGroup'
 import { logToGroup } from '@/helpers/logToGroup'
 import { useBoundStore } from '@/store/store'
+import PostProcess from '@/components/canvas/PostProcess/PostProcess'
+
 const startDebug = () => {
   const hash = window.location.hash
   if (!hash) {
@@ -39,7 +41,6 @@ export default function Home() {
   const setting = useBoundStore((state) => state.setting)
   useEffect(() => {
     logToGroup(LOG_GROUP.UTILS, import.meta.env.VITE_DEBUG_MODE)
-    
 
     if (import.meta.env.VITE_DEBUG_MODE === 'true' && !isDebugMode) {
       startDebug()
@@ -122,6 +123,7 @@ export default function Home() {
                   </>
                 )}
               </Physics>
+              <PostProcess />
             </SceneView>
           </KeyboardControls>
         </>
